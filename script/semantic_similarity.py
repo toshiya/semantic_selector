@@ -1,5 +1,6 @@
-import mysql.connector
 import re
+import os
+import mysql.connector
 from bs4 import BeautifulSoup
 from gensim import corpora, models, similarities
 
@@ -12,9 +13,12 @@ mobage_password = """
 """
 
 def get_inputs():
+    db_password = 'root'
+    if 'DB_PASSWORD' in os.environ:
+        db_password = os.environ['DB_PASSWORD']
     conn = mysql.connector.connect(
             user='root',
-            password='root',
+            password=db_password,
             host='localhost',
             database='login_form'
             )
