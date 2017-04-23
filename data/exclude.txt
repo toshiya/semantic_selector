@@ -1,0 +1,4 @@
+https://accounts.google.com/Login
+https://zozo.jp/_member/login.html
+https://www.daiwa.co.jp/PCC/HomeTrade/Account/m8301_r.html
+https://www.idp.e-rad.go.jp/idp/Authn/UserPassword
