@@ -63,17 +63,6 @@ class LsiModel:
         sims = sorted(enumerate(sims), key=lambda item: -item[1])
         return sims
 
-    def inference(self, target_tag):
-        target_tag_sims = self.get_similar_inputs(target_tag)
-        for i in range(0, 5):
-            r = self.answers[target_tag_sims[i][0]] 
-            print('label:' + r['label'])
-            print('url:' + r['url'])
-            print('html:' + r['html'])
-            print('words:' + " ".join(get_attrs_value(r['html'])))
-            print('similarity: ' + str(target_tag_sims[i][1]))
-            print("\n")
-
 
 def output(target_tag, records, similarities):
     print('target tag: ' + target_tag + ' target words:' + " ".join(get_attrs_value(target_tag)))
@@ -89,7 +78,6 @@ def main():
         answers.append(words)
 
     model = LsiModel(answers)
-    #print(model.dictionary.token2id)
 
     test_records = fetch_all('test_inputs')
     for t in test_records:
