@@ -4,7 +4,7 @@ require 'oga'
 require 'active_record'
 
 class Input < ActiveRecord::Base
-  self.table_name = 'inputs'
+  self.table_name = 'test_inputs'
 end
 
 def db_setup
@@ -12,14 +12,15 @@ def db_setup
     adapter: 'mysql2',
     host: 'localhost',
     username: 'root',
-    password: 'root',
+    password: '',
     database: 'login_form',
   )
 end
 
 def get_url_list
   url_list = []
-  File.readlines('data/url.txt').each {|url| url_list.push(url.chomp) }
+  #File.readlines('data/url.txt').each {|url| url_list.push(url.chomp) }
+  File.readlines('data/test_url.txt').each {|url| url_list.push(url.chomp) }
   return url_list
 end
 
