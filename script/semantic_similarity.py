@@ -8,19 +8,10 @@ import MeCab
 # Work Around for mecab-python3 bug
 # https://github.com/KosukeArima/next/issues/18
 _MECAB_TOKENIZER = MeCab.Tagger("-Owakati")
-
 # https://shogo82148.github.io/blog/2015/12/20/mecab-in-python3-final/
 _MECAB_TOKENIZER.parse('')
 
-# TODO:
-# read from input file
-mobage_loginid = """
-<input type="email" id="mail-address" name="mail_address" placeholder="mangabox@abc.com">
-"""
-
-#<input class="mypage_input" type="text" placeholder="ニックネーム(半角英数字3文字以上16文字以内)" name="nickname" value="">
-
-def get_inputs():
+def fetch_all(table_name):
     db_password = 'root'
     if 'DB_PASSWORD' in os.environ:
         db_password = os.environ['DB_PASSWORD']
@@ -31,7 +22,8 @@ def get_inputs():
             database='login_form'
             )
     cursor = conn.cursor(dictionary=True)
-    cursor.execute('SELECT * FROM inputs')
+    stmt = "SELECT * FROM " + table_name
+    cursor.execute(stmt)
     records = cursor.fetchall()
     conn.close()
     return records
@@ -55,45 +47,55 @@ def get_attrs_value(html):
                 words.extend(p_t[:-1])
     return words
 
-def get_corpus(dictionary, texts):
-    corpus = [dictionary.doc2bow(text) for text in texts]
-    return corpus
 
-def get_similar_inputs(target_html, lsi, index, dictionary):
-    vec_bow = dictionary.doc2bow(get_attrs_value(target_html))
-    vec_lsi = lsi[vec_bow]
-    sims = index[vec_lsi]
-    sims = sorted(enumerate(sims), key=lambda item: -item[1])
-    return sims
+class LsiModel:
+    def __init__(self, answers):
+        self.answers = answers
+        self.dictionary = corpora.Dictionary(answers)
+        self.corpus = [self.dictionary.doc2bow(answer) for answer in answers]
+        self.lsi = models.LsiModel(self.corpus, id2word=self.dictionary, num_topics=5)
+        self.index = similarities.MatrixSimilarity(self.lsi[self.corpus])
+
+    def get_similar_inputs(self, target_tag):
+        vec_bow = self.dictionary.doc2bow(get_attrs_value(target_tag))
+        vec_lsi = self.lsi[vec_bow]
+        sims = self.index[vec_lsi]
+        sims = sorted(enumerate(sims), key=lambda item: -item[1])
+        return sims
+
+    def inference(self, target_tag):
+        target_tag_sims = self.get_similar_inputs(target_tag)
+        for i in range(0, 5):
+            r = self.answers[target_tag_sims[i][0]] 
+            print('label:' + r['label'])
+            print('url:' + r['url'])
+            print('html:' + r['html'])
+            print('words:' + " ".join(get_attrs_value(r['html'])))
+            print('similarity: ' + str(target_tag_sims[i][1]))
+            print("\n")
+
+
+def output(target_tag, records, similarities):
+    print('target tag: ' + target_tag + ' target words:' + " ".join(get_attrs_value(target_tag)))
+    for i in range(0, 5):
+        r = records[similarities[i][0]] 
+        print('label:' + r['label'] + ' url:' + r['url'] + ' html:' + r['html'] + ' words:' + " ".join(get_attrs_value(r['html'])) + 'similarity: ' + str(similarities[i][1]))
 
 def main():
-    records = get_inputs()
-    texts = []
+    records = fetch_all('inputs')
+    answers = []
     for r in records:
         words = get_attrs_value(r['html'])
-        texts.append(words)
+        answers.append(words)
 
-    dictionary = corpora.Dictionary(texts)
-    corpus = get_corpus(dictionary, texts)
+    model = LsiModel(answers)
+    #print(model.dictionary.token2id)
 
-    lsi = models.LsiModel(corpus, id2word=dictionary, num_topics=5)
-    index = similarities.MatrixSimilarity(lsi[corpus])
-
-    print("LoginID\n")
-    # vectorize mobage input
-    print('target tag: ' + mobage_loginid)
-    print('target words:' + " ".join(get_attrs_value(mobage_loginid)))
-    print("\n")
-
-    print("Top 5 similar input tags")
-    mobage_loginid_sims = get_similar_inputs(mobage_loginid, lsi, index, dictionary)
-    for i in range(0, 5):
-        r = records[mobage_loginid_sims[i][0]] 
-        print('label:' + r['label'])
-        print('url:' + r['url'])
-        print('html:' + r['html'])
-        print('words:' + " ".join(get_attrs_value(r['html'])))
-        print('similarity: ' + str(mobage_loginid_sims[i][1]))
+    test_records = fetch_all('test_inputs')
+    for t in test_records:
+        target_tag = t['html']
+        similarities = model.get_similar_inputs(target_tag) 
+        output(target_tag, records, similarities)
         print("\n")
 
 
