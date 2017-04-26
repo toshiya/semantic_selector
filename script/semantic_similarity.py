@@ -5,9 +5,8 @@ from bs4 import BeautifulSoup
 from gensim import corpora, models, similarities
 
 import MeCab
-# Work Around for mecab-python3 bug
-# https://github.com/KosukeArima/next/issues/18
 _MECAB_TOKENIZER = MeCab.Tagger("-Owakati")
+# Work Around for mecab-python3 bug
 # https://shogo82148.github.io/blog/2015/12/20/mecab-in-python3-final/
 _MECAB_TOKENIZER.parse('')
 
@@ -38,7 +37,7 @@ def get_attrs_value(html):
     words = []
     soup = BeautifulSoup(html, 'html.parser')
     s = soup.find('input')
-    for k in ['name', 'value', 'id', 'alt', 'placeholder']:
+    for k in ['name', 'type', 'value', 'id', 'alt', 'placeholder']:
         if (k in s.attrs) and (s.attrs[k] != ''):
             preprocessed_value = re.sub(r'[0-9]', '', convert_to_snake(s.attrs[k]))
             tokens = re.split(r'[-_\]\[ ]', preprocessed_value)
@@ -64,11 +63,28 @@ class LsiModel:
         return sims
 
 
-def output(target_tag, records, similarities):
-    print('target tag: ' + target_tag + ' target words:' + " ".join(get_attrs_value(target_tag)))
+def output(test_record, records, similarities):
+    print('URL: ' + test_record['url'])
+    print('target tag: ' + test_record['html'])
+    # for debug 
+    #print('target words:' + " ".join(get_attrs_value(test_record['html']))) 
+    labels = []
     for i in range(0, 5):
-        r = records[similarities[i][0]] 
-        print('label:' + r['label'] + ' url:' + r['url'] + ' html:' + r['html'] + ' words:' + " ".join(get_attrs_value(r['html'])) + 'similarity: ' + str(similarities[i][1]))
+        r = records[similarities[i][0]]
+        labels.append(r['label'])
+        # for debug 
+        #print('label:' + r['label'] + ' url:' + r['url'] + ' html:' + r['html'] + ' words:' + " ".join(get_attrs_value(r['html'])) + 'similarity: ' + str(similarities[i][1]))
+    num_labels = {}
+    for label in labels:
+        if label not in num_labels:
+            num_labels[label] = 1
+        else:
+            num_labels[label] += 1
+    max_key = max(num_labels.keys(), key=lambda item:num_labels[item])
+    #print('similar labels: ', end='')
+    #print(num_labels)
+    print('estimated label: ' + max_key)
+    print('answer label:' + test_record['label'])
 
 def main():
     records = fetch_all('inputs')
@@ -82,9 +98,10 @@ def main():
     test_records = fetch_all('test_inputs')
     for t in test_records:
         target_tag = t['html']
+        t_label = t['label']
         similarities = model.get_similar_inputs(target_tag) 
-        output(target_tag, records, similarities)
-        print("\n")
+        output(t, records, similarities)
+        print()
 
 
 if __name__ == '__main__':
