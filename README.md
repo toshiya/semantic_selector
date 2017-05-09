@@ -21,7 +21,7 @@ pip install virtualenv
 # make virtual envrionment
 virtualenv semantic
 source semantic/bin/activate
-pip3 install mysql-connector==2.1.4 gensim beautifulsoup4 mecab-python3
+pip3 install mysql-connector==2.1.4 gensim beautifulsoup4 mecab-python3 sklearn
 ```
 
 # Inference
