@@ -3,7 +3,7 @@ require 'active_record'
 require 'pry'
 
 class Input < ActiveRecord::Base
-  self.table_name = 'inputs'
+  self.table_name = 'test_inputs'
 end
 
 def db_setup
