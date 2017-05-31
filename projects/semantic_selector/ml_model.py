@@ -5,7 +5,7 @@ from semantic_selector import preprocessor
 from semantic_selector import datasource
 
 
-class LsiModel:
+class LsiModel(object):
     def __init__(self):
         (self.answers, self.labels) = self.__fetch_training_data()
         self.num_topics = 15
@@ -37,7 +37,8 @@ class LsiModel:
         return ret
 
     def __fetch_training_data(self):
-        records = datasource.fetch_all('inputs')
+        input_tabs = datasource.InputTabs()
+        records = input_tabs.fetch_all('inputs')
         answers = []
         labels = []
         for r in records:

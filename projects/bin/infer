@@ -7,7 +7,8 @@ from semantic_selector import datasource
 def main():
     # training data is now auto loaded during LsiModel initialization 
     model = ml_model.LsiModel()
-    test_records = datasource.fetch_all('test_inputs')
+    input_tabs = datasource.InputTabs()
+    test_records = input_tabs.fetch_all('test_inputs')
 
     hit = 0
     login_e_cnt = 0
@@ -46,6 +47,8 @@ def main():
     print("Precision(password): ", (password_ec_cnt / password_e_cnt))
     print("Recall(password): ", (password_ec_cnt / password_c_cnt))
     print("Total Accuracy: ", (hit / len(test_records)))
+
+    datasource.InputTabs.cleanup()
 
 
 if __name__ == '__main__':
