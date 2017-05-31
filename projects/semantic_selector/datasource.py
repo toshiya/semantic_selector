@@ -3,8 +3,8 @@ import os
 import mysql.connector
 
 
-class InputTabs(object):
-    class __InputTabs:
+class InputTags(object):
+    class __InputTags:
         def __init__(self):
             self.conn = mysql.connector.connect(
                             user='root',
@@ -22,15 +22,15 @@ class InputTabs(object):
     instance = None
 
     def __init__(self):
-        if not InputTabs.instance:
-            InputTabs.instance = InputTabs.__InputTabs()
+        if not InputTags.instance:
+            InputTags.instance = InputTags.__InputTags()
 
     def __getattr__(self, name):
         return getattr(self.instance, name)
 
     def cleanup():
-        InputTabs.instance.conn.close()
-        InputTabs.instance = None
+        InputTags.instance.conn.close()
+        InputTags.instance = None
 
 
 if __name__ == "__main__":

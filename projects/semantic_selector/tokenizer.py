@@ -4,8 +4,8 @@ import MeCab
 from bs4 import BeautifulSoup
 
 
-class InputTabTokenizer(object):
-    class __InputTabTokenizer(object):
+class InputTagTokenizer(object):
+    class __InputTagTokenizer(object):
         def __init__(self):
             self.tokenizer = MeCab.Tagger("-Owakati")
             # Work Around for mecab-python3 bug
@@ -51,9 +51,9 @@ class InputTabTokenizer(object):
     instance = None
 
     def __init__(self):
-        if not InputTabTokenizer.instance:
-            singleton_instance = InputTabTokenizer.__InputTabTokenizer()
-            InputTabTokenizer.instance = singleton_instance
+        if not InputTagTokenizer.instance:
+            singleton_instance = InputTagTokenizer.__InputTagTokenizer()
+            InputTagTokenizer.instance = singleton_instance
 
     def __getattr__(self, name):
         return getattr(self.instance, name)

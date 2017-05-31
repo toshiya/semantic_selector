@@ -41,8 +41,8 @@ class LsiModel(object):
         self.lr = lr
 
     def inference(self, target_tag):
-        input_tab_tokenizer = tokenizer.InputTabTokenizer()
-        tokens = input_tab_tokenizer.get_attrs_value(target_tag)
+        input_tag_tokenizer = tokenizer.InputTagTokenizer()
+        tokens = input_tag_tokenizer.get_attrs_value(target_tag)
         vec_bow = self.dictionary.doc2bow(tokens)
         vec_lsi = self.__sparse_to_dense(self.lsi[vec_bow])
         return self.lr.predict([vec_lsi])[0]
@@ -58,13 +58,13 @@ class LsiModel(object):
         return ret
 
     def __fetch_training_data(self):
-        input_tab_tokenizer = tokenizer.InputTabTokenizer()
-        input_tabs = datasource.InputTabs()
-        records = input_tabs.fetch_all(self.training_data_table)
+        input_tag_tokenizer = tokenizer.InputTagTokenizer()
+        input_tags = datasource.InputTags()
+        records = input_tags.fetch_all(self.training_data_table)
         answers = []
         labels = []
         for r in records:
-            words = input_tab_tokenizer.get_attrs_value(r['html'])
+            words = input_tag_tokenizer.get_attrs_value(r['html'])
             answers.append(words)
             labels.append(r['label'])
         label_types = list(set(labels))

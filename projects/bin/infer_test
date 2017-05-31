@@ -6,8 +6,8 @@ from semantic_selector import datasource
 def main():
     # training data is now auto loaded during LsiModel initialization
     model = ml_model.LsiModel()
-    input_tabs = datasource.InputTabs()
-    test_records = input_tabs.fetch_all('test_inputs')
+    input_tags = datasource.InputTags()
+    test_records = input_tags.fetch_all('test_inputs')
 
     print("html, estimated, correct")
     hit = 0
@@ -24,7 +24,7 @@ def main():
     print("Model Fitting Score,", model.fitting_score)
     print("Total Accuracy,", (hit / len(test_records)))
 
-    datasource.InputTabs.cleanup()
+    datasource.InputTags.cleanup()
 
 
 if __name__ == '__main__':
