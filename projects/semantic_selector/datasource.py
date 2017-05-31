@@ -10,7 +10,7 @@ class InputTags(object):
                             user='root',
                             password='',
                             host='localhost',
-                            database='login_form')
+                            database='register_form')
 
         def fetch_all(self, table_name):
             cursor = self.conn.cursor(dictionary=True)

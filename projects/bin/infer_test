@@ -1,11 +1,24 @@
 #!/usr/bin/env python
+import sys
+import os
+import yaml
 from semantic_selector import ml_model
 from semantic_selector import datasource
 
 
 def main():
+    '''
+        ./bin/infer_test [label grouping file]
+    '''
+    import yaml
+    label_grouping = None
+    if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
+        path = sys.argv[1]
+        with open(path) as f:
+            label_grouping = yaml.load(f.read())
+
     # training data is now auto loaded during LsiModel initialization
-    model = ml_model.LsiModel()
+    model = ml_model.LsiModel(grouping=label_grouping)
     input_tags = datasource.InputTags()
     test_records = input_tags.fetch_all('test_inputs')
 
@@ -13,8 +26,8 @@ def main():
     hit = 0
     for t in test_records:
         target_tag = t['html']
-        estimated_label = model.label_name(model.inference(target_tag))
-        correct_label = t['label']
+        estimated_label = model.grouped_label_name_from_id(model.inference(target_tag))
+        correct_label = model.grouped_label_name(t['label'])
         print(t['html'].replace(',', ' ') +
               ',' + estimated_label +
               "," + correct_label)
