@@ -12,7 +12,6 @@ class InputTabs(object):
                             host='localhost',
                             database='login_form')
 
-
         def fetch_all(self, table_name):
             cursor = self.conn.cursor(dictionary=True)
             stmt = "SELECT * FROM " + table_name
@@ -41,6 +40,7 @@ class InputTabs(object):
                 raise 'Unknown Label_id'
 
     instance = None
+
     def __init__(self):
         if not InputTabs.instance:
             InputTabs.instance = InputTabs.__InputTabs()

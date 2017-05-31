@@ -12,13 +12,17 @@ class LsiModel(object):
 
         dictionary = corpora.Dictionary(self.answers)
         corpus = [dictionary.doc2bow(answer) for answer in self.answers]
-        lsi = models.LsiModel(corpus, id2word=dictionary, num_topics=self.num_topics)
+        lsi = models.LsiModel(corpus,
+                              id2word=dictionary,
+                              num_topics=self.num_topics)
 
         lsi_corpus_flattened = []
-        for lsi_vec in lsi[corpus]:
-            lsi_corpus_flattened.append(self.__sparse_to_dense(lsi_vec))
+        for vec in lsi[corpus]:
+            lsi_corpus_flattened.append(self.__sparse_to_dense(vec))
 
-        lr = LogisticRegression(solver='newton-cg', max_iter=10000, multi_class='ovr')
+        lr = LogisticRegression(solver='newton-cg',
+                                max_iter=10000,
+                                multi_class='ovr')
         lr.fit(X=lsi_corpus_flattened, y=self.labels)
 
         self.fitting_score = lr.score(X=lsi_corpus_flattened, y=self.labels)
@@ -28,7 +32,8 @@ class LsiModel(object):
         self.lr = lr
 
     def inference(self, target_tag):
-        vec_bow = self.dictionary.doc2bow(preprocessor.get_attrs_value(target_tag))
+        tokens = preprocessor.get_attrs_value(target_tag)
+        vec_bow = self.dictionary.doc2bow(tokens)
         vec_lsi = self.__sparse_to_dense(self.lsi[vec_bow])
         return self.lr.predict([vec_lsi])
 

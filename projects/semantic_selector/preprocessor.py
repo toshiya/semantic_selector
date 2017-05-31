@@ -8,6 +8,7 @@ _MECAB_TOKENIZER = MeCab.Tagger("-Owakati")
 # https://shogo82148.github.io/blog/2015/12/20/mecab-in-python3-final/
 _MECAB_TOKENIZER.parse('')
 
+
 def convert_to_snake(name):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
