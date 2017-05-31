@@ -7,8 +7,16 @@ from semantic_selector import datasource
 
 class LsiModel(object):
     def __init__(self):
-        (self.answers, self.labels) = self.__fetch_training_data()
         self.num_topics = 15
+        self.training_data_table = 'inputs'
+        self.lr_solver = 'newton-cg'
+        self.lr_max_iter = 10000
+        self.lr_multi_class = 'ovr'
+
+        (answers, labels, label_types) = self.__fetch_training_data()
+        self.answers = answers
+        self.label_types = label_types
+        self.label_ids = [self.label_id(x) for x in labels]
 
         dictionary = corpora.Dictionary(self.answers)
         corpus = [dictionary.doc2bow(answer) for answer in self.answers]
@@ -20,12 +28,12 @@ class LsiModel(object):
         for vec in lsi[corpus]:
             lsi_corpus_flattened.append(self.__sparse_to_dense(vec))
 
-        lr = LogisticRegression(solver='newton-cg',
-                                max_iter=10000,
-                                multi_class='ovr')
-        lr.fit(X=lsi_corpus_flattened, y=self.labels)
+        lr = LogisticRegression(solver=self.lr_solver,
+                                max_iter=self.lr_max_iter,
+                                multi_class=self.lr_multi_class)
+        lr.fit(X=lsi_corpus_flattened, y=self.label_ids)
 
-        self.fitting_score = lr.score(X=lsi_corpus_flattened, y=self.labels)
+        self.fitting_score = lr.score(X=lsi_corpus_flattened, y=self.label_ids)
         self.dictionary = dictionary
         self.corpus = corpus
         self.lsi = lsi
@@ -35,7 +43,13 @@ class LsiModel(object):
         tokens = preprocessor.get_attrs_value(target_tag)
         vec_bow = self.dictionary.doc2bow(tokens)
         vec_lsi = self.__sparse_to_dense(self.lsi[vec_bow])
-        return self.lr.predict([vec_lsi])
+        return self.lr.predict([vec_lsi])[0]
+
+    def label_id(self, label_name):
+        return self.label_types.index(label_name)
+
+    def label_name(self, label_id):
+        return self.label_types[label_id]
 
     def __sparse_to_dense(self, vec):
         ret = [e[1] for e in vec]
@@ -43,14 +57,15 @@ class LsiModel(object):
 
     def __fetch_training_data(self):
         input_tabs = datasource.InputTabs()
-        records = input_tabs.fetch_all('inputs')
+        records = input_tabs.fetch_all(self.training_data_table)
         answers = []
         labels = []
         for r in records:
             words = preprocessor.get_attrs_value(r['html'])
             answers.append(words)
-            labels.append(preprocessor.to_label_id(r['label']))
-        return (answers, labels)
+            labels.append(r['label'])
+        label_types = list(set(labels))
+        return (answers, labels, label_types)
 
 
 if __name__ == "__main__":

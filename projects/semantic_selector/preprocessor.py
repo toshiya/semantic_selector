@@ -45,27 +45,5 @@ def get_attrs_value(html):
     return words
 
 
-def to_label_id(label):
-    if label == 'login_id':
-        return 0
-    elif label == 'password':
-        return 1
-    elif label == 'other':
-        return 2
-    else:
-        raise 'Unknown Label'
-
-
-def to_label(label_id):
-    if label_id == 0:
-        return 'login_id'
-    elif label_id == 1:
-        return 'password'
-    elif label_id == 2:
-        return 'other'
-    else:
-        raise 'Unknown Label_id'
-
-
 if __name__ == "__main__":
     print("preprocessor")
