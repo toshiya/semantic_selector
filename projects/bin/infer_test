@@ -1,0 +1,31 @@
+#!/usr/bin/env python
+from semantic_selector import ml_model
+from semantic_selector import datasource
+
+
+def main():
+    # training data is now auto loaded during LsiModel initialization
+    model = ml_model.LsiModel()
+    input_tabs = datasource.InputTabs()
+    test_records = input_tabs.fetch_all('test_inputs')
+
+    print("html, estimated, correct")
+    hit = 0
+    for t in test_records:
+        target_tag = t['html']
+        estimated_label = model.label_name(model.inference(target_tag))
+        correct_label = t['label']
+        print(t['html'].replace(',', ' ') +
+              ',' + estimated_label +
+              "," + correct_label)
+        if estimated_label == correct_label:
+            hit += 1
+    print()
+    print("Model Fitting Score,", model.fitting_score)
+    print("Total Accuracy,", (hit / len(test_records)))
+
+    datasource.InputTabs.cleanup()
+
+
+if __name__ == '__main__':
+    main()
