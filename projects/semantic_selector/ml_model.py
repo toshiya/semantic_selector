@@ -15,27 +15,32 @@ class LsiModel(object):
         self.lr_multi_class = 'ovr'
         self.grouping = grouping
 
-        (answers, grouped_labels, grouped_label_types) = self.__fetch_training_data()
+        (answers,
+         grouped_labels,
+         grouped_label_types) = self.__fetch_training_data()
         self.answers = answers
         self.grouped_label_types = grouped_label_types
-        self.grouped_label_ids = [self.grouped_label_id(x) for x in grouped_labels]
+        self.grouped_label_ids = [
+                self.grouped_label_id(x) for x in grouped_labels
+                ]
 
         dictionary = corpora.Dictionary(self.answers)
         corpus = [dictionary.doc2bow(answer) for answer in self.answers]
         lsi = models.LsiModel(corpus,
-                id2word=dictionary,
-                num_topics=self.num_topics)
+                              id2word=dictionary,
+                              num_topics=self.num_topics)
 
         lsi_corpus_flattened = []
         for vec in lsi[corpus]:
             lsi_corpus_flattened.append(self.__sparse_to_dense(vec))
 
         lr = LogisticRegression(solver=self.lr_solver,
-                max_iter=self.lr_max_iter,
-                multi_class=self.lr_multi_class)
+                                max_iter=self.lr_max_iter,
+                                multi_class=self.lr_multi_class)
         lr.fit(X=lsi_corpus_flattened, y=self.grouped_label_ids)
 
-        self.fitting_score = lr.score(X=lsi_corpus_flattened, y=self.grouped_label_ids)
+        self.fitting_score = lr.score(X=lsi_corpus_flattened,
+                                      y=self.grouped_label_ids)
         self.dictionary = dictionary
         self.corpus = corpus
         self.lsi = lsi

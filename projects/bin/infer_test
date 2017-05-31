@@ -26,7 +26,9 @@ def main():
     hit = 0
     for t in test_records:
         target_tag = t['html']
-        estimated_label = model.grouped_label_name_from_id(model.inference(target_tag))
+        estimated_label = model.grouped_label_name_from_id(
+                                    model.inference(target_tag)
+                                    )
         correct_label = model.grouped_label_name(t['label'])
         print(t['html'].replace(',', ' ') +
               ',' + estimated_label +
