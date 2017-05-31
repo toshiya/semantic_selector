@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 import MeCab
 from bs4 import BeautifulSoup
@@ -63,7 +64,6 @@ def to_label(label_id):
         return 'other'
     else:
         raise 'Unknown Label_id'
-
 
 
 if __name__ == "__main__":

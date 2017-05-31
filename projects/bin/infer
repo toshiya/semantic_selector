@@ -5,16 +5,8 @@ from semantic_selector import preprocessor
 from semantic_selector import datasource
 
 def main():
-    records = datasource.fetch_all('inputs')
-    answers = []
-    labels = []
-    for r in records:
-        words = preprocessor.get_attrs_value(r['html'])
-        answers.append(words)
-        labels.append(preprocessor.to_label_id(r['label']))
-
-    model = ml_model.LsiModel(answers, labels)
-
+    # training data is now auto loaded during LsiModel initialization 
+    model = ml_model.LsiModel()
     test_records = datasource.fetch_all('test_inputs')
 
     hit = 0
