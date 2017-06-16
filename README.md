@@ -21,9 +21,13 @@ pip install virtualenv
 # make virtual envrionment
 virtualenv semantic
 source semantic/bin/activate
-pip3 install mysql-connector==2.1.4 gensim beautifulsoup4 mecab-python3 sklearn
+cd projects
+pip3 install -r requirements.txt
 ```
 
 # Inference
 
-TODO
+```
+cd projects
+PYTHONPATH=.  ./bin/infer_test
+```
