@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 class InputTagTokenizer(object):
     class __InputTagTokenizer(object):
         def __init__(self):
-            self.tokenizer = MeCab.Tagger("-Owakati")
+            self.tokenizer = MeCab.Tagger("")
             # Work Around for mecab-python3 bug
             # https://shogo82148.github.io/blog/2015/12/20/mecab-in-python3-final/
             self.tokenizer.parse('')
@@ -20,10 +20,20 @@ class InputTagTokenizer(object):
                     'placeholder'
                     ]
 
+        def mecab_tokenize(self, text):
+            ret = []
+            node = self.tokenizer.parseToNode(text)
+            while node:
+                feats = node.feature.split(",")
+                if feats[0] in ['名詞']:
+                    ret.append(node.surface)
+                node = node.next
+            return ret
+
         def get_attrs_value(self, html):
             words = []
-            soup = BeautifulSoup(html, 'html.parser')
-            s = soup.find('input')
+            html_soup = BeautifulSoup(html, 'html.parser')
+            s = html_soup.find('input')
             for k in self.target_attributes:
                 if (k not in s.attrs) or (s.attrs[k] == ''):
                     continue
@@ -39,10 +49,10 @@ class InputTagTokenizer(object):
 
         def __preprocess(self, value):
             snake_case_value = self.__convert_to_snake(value)
-            snake_case_value = re.sub(r'[0-9]', '', snake_case_value)
+            snake_case_value = re.sub(r'([0-9]+)', r'_\1', snake_case_value)
             tokens = re.split(r'[-_\]\[ ]', snake_case_value)
             for t in tokens:
-                japanese_tokens = self.tokenizer.parse(t).split(' ')
+                japanese_tokens = self.mecab_tokenize(t)
                 for j_t in japanese_tokens:
                     if j_t == "\n":
                         continue

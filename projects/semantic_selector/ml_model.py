@@ -8,7 +8,7 @@ from semantic_selector import datasource
 class LsiModel(object):
 
     def __init__(self, grouping=None):
-        self.num_topics = 25
+        self.num_topics = 100
         self.training_data_table = 'inputs'
         self.lr_solver = 'newton-cg'
         self.lr_max_iter = 10000
