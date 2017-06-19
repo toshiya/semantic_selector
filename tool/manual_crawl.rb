@@ -53,9 +53,6 @@ binding.pry
 # $ fill_input_tags(tags)
 #
 ## 目視で番号の入ったラベルを確認しながら、ラベルを手動でつける
-## 既存ラベル一覧
-## https://github.dena.jp/gist/toshiya-komoda/87ebc5d16953ef07663869446570f63a
-## 一覧にない場合は、都度新しいラベルを定義する
 # $ save(driver, tags[2], "pc_email")
 
 driver.quit
