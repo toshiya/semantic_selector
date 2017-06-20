@@ -17,27 +17,38 @@ def main():
         with open(path) as f:
             label_grouping = yaml.load(f.read())
 
-    # training data is now auto loaded during LsiModel initialization
+    # training data is auto loaded during LsiModel initialization
     model = ml_model.LsiModel(grouping=label_grouping)
-    input_tags = datasource.InputTags()
-    test_records = input_tags.fetch_all('test_inputs')
-
     print("html, estimated, correct")
-    hit = 0
+    positive_hit = 0
+    unknown_hit = 0
+    unknown_cnt = 0
+    test_records = model.test_data
     for t in test_records:
         target_tag = t['html']
         estimated_label = model.grouped_label_name_from_id(
-                                    model.inference(target_tag)
+                                    model.inference_html(target_tag)
                                     )
         correct_label = model.grouped_label_name(t['label'])
-        print(t['html'].replace(',', ' ') +
-              ',' + estimated_label +
-              "," + correct_label)
+        if estimated_label != correct_label:
+            print(t['html'].replace(',', '') +
+                  ',' + estimated_label +
+                  "," + correct_label)
+        if correct_label == 'unknown':
+            unknown_cnt += 1
         if estimated_label == correct_label:
-            hit += 1
+            if correct_label == 'unknown':
+                unknown_hit += 1
+            else:
+                positive_hit += 1
+
     print()
+    print("# of test data: " + str(len(model.test_data)))
+    print("# of training_data: " + str(len(model.answers)))
     print("Model Fitting Score,", model.fitting_score)
-    print("Total Accuracy,", (hit / len(test_records)))
+    print("Total Accuracy,", ((positive_hit + unknown_hit) / len(test_records)))
+    print("Total Recall,", (positive_hit / (len(test_records) - unknown_cnt)))
+    print("unkown ratio in test data,", (unknown_cnt / len(test_records)))
 
     datasource.InputTags.cleanup()
 

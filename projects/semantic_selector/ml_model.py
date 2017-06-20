@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import random
+import time
 from gensim import corpora, models, similarities
 from sklearn.linear_model import LogisticRegression
 from semantic_selector import tokenizer
@@ -8,21 +10,32 @@ from semantic_selector import datasource
 class LsiModel(object):
 
     def __init__(self, grouping=None):
-        self.num_topics = 25
+        random.seed(int(time.time()))
+        self.num_topics = 100
+        self.ratio_test_data = 0.05
         self.training_data_table = 'inputs'
         self.lr_solver = 'newton-cg'
         self.lr_max_iter = 10000
         self.lr_multi_class = 'ovr'
         self.grouping = grouping
 
-        (answers,
+        (records,
          grouped_labels,
          grouped_label_types) = self.__fetch_training_data()
-        self.answers = answers
+        self.answers = [r['words'] for r in records]
         self.grouped_label_types = grouped_label_types
         self.grouped_label_ids = [
                 self.grouped_label_id(x) for x in grouped_labels
                 ]
+
+        self.num_test_data = int(len(self.answers) * self.ratio_test_data)
+        self.test_data = []
+        for r in range(self.num_test_data):
+            random_index = random.randint(0, len(self.answers) - 1)
+            if self.answers[random_index]:
+                self.test_data.append(records[random_index])
+                del self.answers[random_index]
+                del self.grouped_label_ids[random_index]
 
         dictionary = corpora.Dictionary(self.answers)
         corpus = [dictionary.doc2bow(answer) for answer in self.answers]
@@ -46,7 +59,7 @@ class LsiModel(object):
         self.lsi = lsi
         self.lr = lr
 
-    def inference(self, target_tag):
+    def inference_html(self, target_tag):
         input_tag_tokenizer = tokenizer.InputTagTokenizer()
         tokens = input_tag_tokenizer.get_attrs_value(target_tag)
         vec_bow = self.dictionary.doc2bow(tokens)
@@ -77,15 +90,14 @@ class LsiModel(object):
         input_tag_tokenizer = tokenizer.InputTagTokenizer()
         input_tags = datasource.InputTags()
         records = input_tags.fetch_all(self.training_data_table)
-        answers = []
         labels = []
         for r in records:
             words = input_tag_tokenizer.get_attrs_value(r['html'])
-            answers.append(words)
+            r['words'] = words
             labels.append(r['label'])
         grouped_labels = [self.grouped_label_name(l) for l in labels]
         grouped_label_types = list(set(grouped_labels))
-        return (answers, labels, grouped_label_types)
+        return (records, labels, grouped_label_types)
 
 
 if __name__ == "__main__":
