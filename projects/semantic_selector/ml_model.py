@@ -9,10 +9,10 @@ from semantic_selector import datasource
 
 class LsiModel(object):
 
-    def __init__(self, grouping=None):
+    def __init__(self, test_data_ratio=0, grouping=None):
         random.seed(int(time.time()))
         self.num_topics = 100
-        self.ratio_test_data = 0.05
+        self.ratio_test_data = test_data_ratio
         self.training_data_table = 'inputs'
         self.lr_solver = 'newton-cg'
         self.lr_max_iter = 10000

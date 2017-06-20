@@ -31,3 +31,10 @@ pip3 install -r requirements.txt
 cd projects
 PYTHONPATH=.  ./bin/infer_test
 ```
+
+# start API server
+
+```
+cd projects
+PYTHONPATH=. FLASK_APP=./bin/api.py flask run
+```
