@@ -8,7 +8,7 @@ Load answer data to local mysql server.
 
 ```
 mysql -uxxx -p -e 'create database register_form'
-mysql -uxxx -p -e login_form < data/register_form.sql
+mysql -uxxx -p -e register_form < data/register_form.sql
 ```
 
 install mecab for japanese handling.
