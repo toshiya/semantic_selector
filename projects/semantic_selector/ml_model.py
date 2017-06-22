@@ -9,10 +9,10 @@ from semantic_selector import datasource
 
 class LsiModel(object):
 
-    def __init__(self, grouping=None):
+    def __init__(self, test_data_ratio=0, grouping=None):
         random.seed(int(time.time()))
         self.num_topics = 100
-        self.ratio_test_data = 0.05
+        self.ratio_test_data = test_data_ratio
         self.training_data_table = 'inputs'
         self.lr_solver = 'newton-cg'
         self.lr_max_iter = 10000
@@ -64,7 +64,10 @@ class LsiModel(object):
         tokens = input_tag_tokenizer.get_attrs_value(target_tag)
         vec_bow = self.dictionary.doc2bow(tokens)
         vec_lsi = self.__sparse_to_dense(self.lsi[vec_bow])
-        return self.lr.predict([vec_lsi])[0]
+        if len(vec_lsi) == 0:
+            return 'unknown'
+        else:
+            return self.grouped_label_name_from_id(self.lr.predict([vec_lsi])[0])
 
     def grouped_label_id(self, label_name):
         grouped_label_name = self.grouped_label_name(label_name)

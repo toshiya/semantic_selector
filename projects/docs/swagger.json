@@ -1,0 +1,85 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Labradorのinputタグのラベル推定APIのプロトだよ",
+    "version": "v0.1",
+    "title": "Labrador API",
+    "contact": {
+      "email": "toshiya.komoda@dena.com"
+    }
+  },
+  "host": "localhost:5000",
+  "basePath": "/api",
+  "tags": [],
+  "schemes": [
+    "http"
+  ],
+  "securityDefinitions":  {
+  },
+  "security" : [
+  ],
+  "paths": {
+    "/inference": {
+      "post": {
+        "tags": [],
+        "summary": "inference api for input tags",
+        "description": "return an infered label of the given input tag.",
+        "operationId": "inference.input_tags",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "html",
+            "in": "body",
+            "required" : true,
+            "schema": {
+              "$ref" : "#/definitions/html"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "正常に推定処理が完了しました",
+            "schema": {
+              "$ref": "#/definitions/inference"
+            }
+          },
+          "400": {
+            "description": "リクエストデータが不正です"
+          },
+          "500": {
+            "description": "API 側の問題による失敗です"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "html": {
+      "type": "object",
+      "required": [
+        "html"
+      ],
+      "properties": {
+        "html": {
+          "type": "string"
+        }
+      }
+    },
+    "inference": {
+      "type": "object",
+      "required": [
+        "label"
+      ],
+      "properties": {
+        "label": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

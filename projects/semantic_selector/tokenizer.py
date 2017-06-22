@@ -34,6 +34,8 @@ class InputTagTokenizer(object):
             words = []
             html_soup = BeautifulSoup(html, 'html.parser')
             s = html_soup.find('input')
+            if s == None:
+                return []
             for k in self.target_attributes:
                 if (k not in s.attrs) or (s.attrs[k] == ''):
                     continue
