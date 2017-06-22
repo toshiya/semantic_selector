@@ -64,7 +64,10 @@ class LsiModel(object):
         tokens = input_tag_tokenizer.get_attrs_value(target_tag)
         vec_bow = self.dictionary.doc2bow(tokens)
         vec_lsi = self.__sparse_to_dense(self.lsi[vec_bow])
-        return self.lr.predict([vec_lsi])[0]
+        if len(vec_lsi) == 0:
+            return 'unknown'
+        else:
+            return self.grouped_label_name_from_id(self.lr.predict([vec_lsi])[0])
 
     def grouped_label_id(self, label_name):
         grouped_label_name = self.grouped_label_name(label_name)
