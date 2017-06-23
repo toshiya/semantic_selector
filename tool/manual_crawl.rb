@@ -32,6 +32,18 @@ def find_input_tags(driver)
   driver.find_elements(:xpath, '//input[not(@type="hidden")]')
 end
 
+def find_radio_box(driver)
+  driver.find_elements(:xpath, '//input[@type="radio"]')
+end
+
+def find_select_box(driver)
+  driver.find_elements(:xpath, '//select[not(@type="hidden")]')
+end
+
+def find_check_box(driver)
+  driver.find_elements(:xpath, '//input[@type="checkbox"]')
+end
+
 def fill_input_tags(input_tags)
   input_tags.each_with_index do |e, i|
     next unless e.displayed?
