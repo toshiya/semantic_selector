@@ -19,6 +19,14 @@ class InputTagTokenizer(object):
                     'alt',
                     'placeholder'
                     ]
+            self.exclude_words = [
+                     "",
+                     ".",
+                     "(",
+                     ")",
+                     "/",
+                     "\n"
+                    ]
 
         def mecab_tokenize(self, text):
             ret = []
@@ -31,17 +39,44 @@ class InputTagTokenizer(object):
             return ret
 
         def get_attrs_value(self, html):
-            words = []
             html_soup = BeautifulSoup(html, 'html.parser')
+
             s = html_soup.find('input')
-            if s == None:
-                return []
+            if s is not None:
+                return self.__attrs_values_from_input(s)
+
+            s = html_soup.find('select')
+            if s is not None:
+                return self.__attrs_values_from_select(s)
+
+            return []
+
+        def __attrs_values_from_input(self, input_tag):
+            words = []
             for k in self.target_attributes:
-                if (k not in s.attrs) or (s.attrs[k] == ''):
+                if (k not in input_tag.attrs) or (input_tag.attrs[k] == ''):
                     continue
 
-                for token in self.__preprocess(s.attrs[k]):
+                for token in self.__preprocess(input_tag.attrs[k]):
                     words.append(token)
+
+            return words
+
+        def __attrs_values_from_select(self, select_tag):
+            words = []
+            for k in self.target_attributes:
+                if (k not in select_tag.attrs) or (select_tag.attrs[k] == ''):
+                    continue
+
+                for token in self.__preprocess(select_tag.attrs[k]):
+                    words.append(token)
+
+            inner_options = select_tag.find_all('option')
+            for option in inner_options:
+                if len(option.contents) > 0:
+                    word = option.contents[0]
+                    for token in self.__preprocess(word):
+                        words.append(token)
 
             return words
 
@@ -56,7 +91,7 @@ class InputTagTokenizer(object):
             for t in tokens:
                 japanese_tokens = self.mecab_tokenize(t)
                 for j_t in japanese_tokens:
-                    if j_t == "\n":
+                    if j_t in self.exclude_words:
                         continue
                     yield j_t
 

@@ -11,7 +11,7 @@ class LsiModel(object):
 
     def __init__(self, test_data_ratio=0, grouping=None):
         random.seed(int(time.time()))
-        self.num_topics = 100
+        self.num_topics = 500
         self.ratio_test_data = test_data_ratio
         self.training_data_table = 'inputs'
         self.lr_solver = 'newton-cg'
@@ -67,7 +67,8 @@ class LsiModel(object):
         if len(vec_lsi) == 0:
             return 'unknown'
         else:
-            return self.grouped_label_name_from_id(self.lr.predict([vec_lsi])[0])
+            predict_value = self.lr.predict([vec_lsi])[0]
+            return self.grouped_label_name_from_id(predict_value)
 
     def grouped_label_id(self, label_name):
         grouped_label_name = self.grouped_label_name(label_name)
@@ -86,7 +87,9 @@ class LsiModel(object):
                 return label_name
 
     def __sparse_to_dense(self, vec):
-        ret = [e[1] for e in vec]
+        ret = [0 for e in range(self.num_topics)]
+        for v in vec:
+            ret[v[0]] = v[1]
         return ret
 
     def __fetch_training_data(self):
