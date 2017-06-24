@@ -19,6 +19,14 @@ class InputTagTokenizer(object):
                     'alt',
                     'placeholder'
                     ]
+            self.exclude_words = [
+                     "",
+                     ".",
+                     "(",
+                     ")",
+                     "/",
+                     "\n"
+                    ]
 
         def mecab_tokenize(self, text):
             ret = []
@@ -83,8 +91,7 @@ class InputTagTokenizer(object):
             for t in tokens:
                 japanese_tokens = self.mecab_tokenize(t)
                 for j_t in japanese_tokens:
-                    # TODO list
-                    if j_t == "\n" or j_t == "" or j_t == "." or j_t == "(" or j_t == ")" or j_t == "/":
+                    if j_t in self.exclude_words:
                         continue
                     yield j_t
 

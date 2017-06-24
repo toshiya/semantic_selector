@@ -43,6 +43,7 @@ def main():
     print()
     print("# of test data: " + str(len(model.test_data)))
     print("# of training_data: " + str(len(model.answers)))
+    print("# of vector elements: " + str(model.num_topics))
     print("Model Fitting Score,", model.fitting_score)
     print("Total Accuracy,", ((positive_hit + unknown_hit) / len(test_records)))
     print("Total Recall,", (positive_hit / (len(test_records) - unknown_cnt)))
