@@ -42,11 +42,11 @@ class InputTagTokenizer(object):
             html_soup = BeautifulSoup(html, 'html.parser')
 
             s = html_soup.find('input')
-            if s != None:
+            if s is not None:
                 return self.__attrs_values_from_input(s)
 
             s = html_soup.find('select')
-            if s != None:
+            if s is not None:
                 return self.__attrs_values_from_select(s)
 
             return []

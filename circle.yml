@@ -1,0 +1,11 @@
+machine:
+  python:
+    version: 3.5.0
+
+dependencies:
+  pre:
+    - pip3 install pep8
+
+test:
+  override:
+    - pep8 projects/semantic_selector/*.py

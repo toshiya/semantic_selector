@@ -7,17 +7,20 @@ import yaml
 
 app = Flask(__name__)
 
+
 def get_model():
-    if not hasattr(g, 'model') or g.model == None:
-        label_file = os.path.join(os.path.dirname(__file__), "../../data/label_grouping_example.yml")
+    if not hasattr(g, 'model') or g.model is None:
+        label_file = "../../data/label_grouping_example.yml"
+        label_file = os.path.join(os.path.dirname(__file__), label_file)
         with open(label_file) as f:
             label_grouping = yaml.load(f.read())
         g.model = ml_model.LsiModel(grouping=label_grouping)
     return g.model
 
+
 @app.teardown_appcontext
 def close_db(error):
-    if hasattr(g, 'model') and g.model != None:
+    if hasattr(g, 'model') and g.model is not None:
         datasource.InputTags.cleanup()
 
 
@@ -26,11 +29,12 @@ def inference():
     if request.headers['Content-Type'] != 'application/json':
         return make_response("Content-Type must be application/json", 400)
 
-    if not "html" in request.json.keys():
-        return make_response('request body json must contain "html" attributes', 400)
+    if "html" not in request.json.keys():
+        err_message = 'request body json must contain "html" attributes'
+        return make_response(err_message, 400)
 
     target_tag = request.json["html"]
     model = get_model()
     estimated_label = model.inference_html(target_tag)
-    res = { "label" : estimated_label  }
+    res = {"label": estimated_label}
     return jsonify(res)

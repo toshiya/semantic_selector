@@ -67,7 +67,8 @@ class LsiModel(object):
         if len(vec_lsi) == 0:
             return 'unknown'
         else:
-            return self.grouped_label_name_from_id(self.lr.predict([vec_lsi])[0])
+            predict_value = self.lr.predict([vec_lsi])[0]
+            return self.grouped_label_name_from_id(predict_value)
 
     def grouped_label_id(self, label_name):
         grouped_label_name = self.grouped_label_name(label_name)
