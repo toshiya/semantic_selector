@@ -61,12 +61,29 @@ bundle install --path vendor/bundle
 mysql.server start
 bundle exec -- ruby manual_crawl.rb
 
-# label in pry CLI manually
 $ driver.navigate.to "https://www.muji.net/store/cust/useradd/fullinfo?beforeUrl=terms"
+
+# check the url has been already visited?
+$ visited?(driver.current_url)
+
 $ inputs = find_input_tags(driver)
 $ fill_input_tags(inputs)
-
 # check the filled numbers in your browser, and save the form with the label.
 # then, labeled data will be in your local mysql.
 $ save(driver, inputs[2], "pc_email")
+
+$ radios = find_radio_box(driver)
+$ radios[0].click()
+$ save(driver, radios[0], "gender")
+
+$ selects = find_select_box(driver)
+$ selects[0].click()
+$ save(driver, selects[0], "birhtday_year")
+
+$ checks = find_check_box(driver)
+$ checks[0].click()
+$ save(driver, checks[0], "mail_delivery")
+
+# if the element is hidden, use js to click.
+$ click_by_js(driver, radios[0])
 ```

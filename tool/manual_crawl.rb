@@ -13,10 +13,16 @@ def db_setup
     username: 'root',
     password: '',
     database: 'register_form',
-  )
-end
+  ) end
 
-def save(driver, node, label)
+def save(driver, node, label, new_definition=false)
+  existing_labels = labels()
+  unless (new_definition || existing_labels.include?(label))
+    puts "#{label} is newly defined? is it ok?"
+    puts "set new_definition flag as save(driver, node, label, true)"
+    return
+  end
+
   url = driver.current_url
   html = node.attribute('outerHTML')
   parent_html = node.find_element(:xpath, "..").attribute('outerHTML')
@@ -26,6 +32,18 @@ def save(driver, node, label)
     parent_html: parent_html,
     label: label
   )
+end
+
+def labels()
+  Input.select('label').group('label').map(&:label)
+end
+
+def urls()
+  Input.select('url').group('url').map(&:url)
+end
+
+def visited?(current_url)
+  urls.include?(current_url)
 end
 
 def find_input_tags(driver)
@@ -53,6 +71,10 @@ def fill_input_tags(input_tags)
       puts e
     end
   end
+end
+
+def click_by_js(driver, element)
+  driver.execute_script("return arguments[0].click()", element)
 end
 
 db_setup()
