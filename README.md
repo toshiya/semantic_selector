@@ -4,43 +4,42 @@
 
 # Setup
 
-Load answer data to local mysql server.
+```bash
+brew install mysql pyenv mecab mecab-ipadic
 
-```
 mysql -uxxx -p -e 'create database register_form'
 mysql -uxxx -p register_form < data/register_form.sql
-```
 
-install mecab for japanese handling.
-```
-brew install mecab
-brew install mecab-ipadic
-```
-
-setup python3 and virtual env.
-
-```
-brew install pyenv
-# need python3.5+
+# python3.5+
 pyenv install 3.5.2
-pip install virtualenv
-
-# make virtual envrionment
-virtualenv venv
+pyenv local 3.5.2
+python3.6 -m venv venv
 source venv/bin/activate
 pip3 install -r projects/requirements.txt
+
 ```
 
 # Inference
 
-```
-cd projects
-PYTHONPATH=.  ./bin/infer_test
+```bash
+$ PYTHONPATH=projects  ./projects/bin/infer_test
+failing inferences
+html, estimated, correct
+<input style="float: right; margin-right: 115px; width: 320px;" placeholder="もう一度パスワードを入力" type="password" name="password_cfm" id="" ng-model="password_cfm" ng-required="true" match="password" class="ng-invalid ng-dirty ng-valid-parse ng-valid-required ng-invalid-mismatch ng-touched" required="required">,password,password_confirmation
+<input type="checkbox" class="use-cookie-personalization-field hidden" name="user[use_cookie_personalization]" value="1" style="display: inline-block;">,service_term,user_customization
+
+# of test data: 39
+# of training_data: 757
+# of vector elements: 500
+Model Fitting Score, 0.948480845443
+Accuracy, 0.9487179487179487
+Recall, 0.9487179487179487
+unkown ratio in test data, 0.0
 ```
 
 # start API server at local
 
-```
+```bash
 cd projects
 PYTHONPATH=. FLASK_APP=./bin/api.py flask run
 

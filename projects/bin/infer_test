@@ -19,6 +19,7 @@ def main():
 
     # training data is auto loaded during LsiModel initialization
     model = ml_model.LsiModel(grouping=label_grouping, test_data_ratio=0.05)
+    print("failing inferences")
     print("html, estimated, correct")
     positive_hit = 0
     unknown_hit = 0
