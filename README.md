@@ -46,3 +46,27 @@ PYTHONPATH=. FLASK_APP=./bin/api.py flask run
 # call it in another console
 curl -X POST -H "Content-Type: application/json" http://localhost/api/inference -d '{ "html" : "<input type='text' name='mail_addr' placeholder='メールアドレス'>"}'
 ```
+
+# Collect new training data
+
+Provide some utitlity functions to label input forms.
+require Ruby2.4+
+
+```bash
+brew install chromedriver
+cd tool
+gem install bundler
+bundle install --path vendor/bundle
+
+mysql.server start
+bundle exec -- ruby manual_crawl.rb
+
+# label in pry CLI manually
+$ driver.navigate.to "https://www.muji.net/store/cust/useradd/fullinfo?beforeUrl=terms"
+$ inputs = find_input_tags(driver)
+$ fill_input_tags(inputs)
+
+# check the filled numbers in your browser, and save the form with the label.
+# then, labeled data will be in your local mysql.
+$ save(driver, inputs[2], "pc_email")
+```

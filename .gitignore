@@ -1,2 +1,7 @@
 .python-version
+.ruby-version
 *.pyc
+tool/.bundle/
+tool/Gemfile.lock
+tool/vendor/
+venv/

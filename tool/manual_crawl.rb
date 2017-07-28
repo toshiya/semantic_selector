@@ -59,12 +59,4 @@ db_setup()
 driver = Selenium::WebDriver.for :chrome
 
 binding.pry
-# Manual Labeling Command Example in Pry CLI
-# $ driver.navigate.to "https://www.muji.net/store/cust/useradd/fullinfo?beforeUrl=terms"
-# $ find_input_tags(driver)
-# $ fill_input_tags(tags)
-#
-## 目視で番号の入ったラベルを確認しながら、ラベルを手動でつける
-# $ save(driver, tags[2], "pc_email")
-
 driver.quit
