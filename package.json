@@ -1,0 +1,24 @@
+{
+  "name": "semantic_selector",
+  "version": "0.0.1",
+  "description": "input topic idenfification based on machine learning",
+  "main": "index.js",
+  "scripts": {
+    "danger": "danger"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toshiya/semantic_selector.git"
+  },
+  "author": "toshiya.komoda@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/toshiya/semantic_selector/issues"
+  },
+  "homepage": "https://github.com/toshiya/semantic_selector#readme",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.24.1",
+    "danger": "^2.0.0-alpha.1",
+    "danger-plugin-fixme": "^1.0.0"
+  }
+}

@@ -1,6 +1,8 @@
 machine:
   python:
     version: 3.5.0
+  node:
+    version: 8.3.0
 
 dependencies:
   pre:
@@ -9,3 +11,4 @@ dependencies:
 test:
   override:
     - pep8 projects/semantic_selector/*.py
+    - npm run danger
