@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, make_response, g
+from flask import Flask, request, jsonify, make_response
 from semantic_selector import ml_model
 from semantic_selector import datasource
 
@@ -6,22 +6,19 @@ import os
 import yaml
 
 app = Flask(__name__)
+g_model = None
 
 
 def get_model():
-    if not hasattr(g, 'model') or g.model is None:
+    global g_model
+    if g_model is None:
+        print("read from db")
         label_file = "../../data/label_grouping_example.yml"
         label_file = os.path.join(os.path.dirname(__file__), label_file)
         with open(label_file) as f:
             label_grouping = yaml.load(f.read())
-        g.model = ml_model.LsiModel(grouping=label_grouping)
-    return g.model
-
-
-@app.teardown_appcontext
-def close_db(error):
-    if hasattr(g, 'model') and g.model is not None:
-        datasource.InputTags.cleanup()
+        g_model = ml_model.LsiModel(grouping=label_grouping)
+    return g_model
 
 
 @app.route("/api/inference", methods=['POST'])
