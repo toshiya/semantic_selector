@@ -19,6 +19,7 @@ class LsiModel(object):
         self.lr_multi_class = 'ovr'
         self.grouping = grouping
 
+        import pdb; pdb.set_trace();
         (records,
          grouped_labels,
          grouped_label_types) = self.__fetch_training_data()
