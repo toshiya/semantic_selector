@@ -777,11 +777,9 @@ cssom@0.3.x, "cssom@>= 0.3.0 < 0.4.0", "cssom@>= 0.3.2 < 0.4.0":
   dependencies:
     cssom "0.3.x"
 
-danger-plugin-fixme@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/danger-plugin-fixme/-/danger-plugin-fixme-1.0.0.tgz#3e53ffb0f36a34d7e50da5b57be8a558e77c1f4a"
-  dependencies:
-    lodash "^4.17.4"
+danger-plugin-wordcheck@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/danger-plugin-wordcheck/-/danger-plugin-wordcheck-0.0.1.tgz#1f5bbaaacbe2056eda5fc3d7688a95b19ed76abc"
   optionalDependencies:
     esdoc "^0.5.2"
 
@@ -1781,7 +1779,7 @@ lodash.some@^4.4.0:
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/lodash.some/-/lodash.some-4.6.0.tgz#1bb9f314ef6b8baded13b549169b2a945eb68e4d"
 
-lodash@^4.1.0, lodash@^4.17.4, lodash@^4.2.0:
+lodash@^4.1.0, lodash@^4.2.0:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 

@@ -1,3 +1,2 @@
-import fixme from 'danger-plugin-fixme'
-fixme(['FIXME', 'TODO', 'pdb.set_trace()'])
-message("check finished")
+import wordcheck from 'danger-plugin-wordcheck'
+schedule(wordcheck("./.github/WORDCHECK.txt"))
