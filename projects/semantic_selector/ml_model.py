@@ -7,18 +7,15 @@ from semantic_selector import datasource
 
 class LsiModel(object):
 
-    def __init__(self, test_data_ratio=0):
+    def __init__(self, training):
         self.num_topics = 500
-        self.ratio_test_data = test_data_ratio
-        self.training_data_table = 'inputs'
         self.lr_solver = 'newton-cg'
         self.lr_max_iter = 10000
         self.lr_multi_class = 'ovr'
 
         (self.word_vecs,
          self.label_ids,
-         self.label_types,
-         self.test_data) = self.__fetch_training_data(self.ratio_test_data)
+         self.label_types) = self.__convert_training(training)
 
         dictionary = corpora.Dictionary(self.word_vecs)
         corpus = [dictionary.doc2bow(word_vec) for word_vec in self.word_vecs]
@@ -62,25 +59,19 @@ class LsiModel(object):
             ret[v[0]] = v[1]
         return ret
 
-    def __fetch_training_data(self, ratio_test_data):
+    def __convert_training(self, training):
         input_tag_tokenizer = tokenizer.InputTagTokenizer()
-        input_tags = datasource.InputTags()
-        (training, test) = input_tags.fetch_data(ratio_test_data)
-
         word_vecs = []
         labels = []
         test_labels = []
         for r in training:
             word_vecs.append(input_tag_tokenizer.get_attrs_value(r.html))
             labels.append(r.label)
-        for r in test:
-            test_labels.append(r.label)
 
-        # add labels only in test
-        label_types = list(set(labels + test_labels))
+        label_types = list(set(labels))
         label_ids = [label_types.index(x) for x in labels]
 
-        return (word_vecs, label_ids, label_types, test)
+        return (word_vecs, label_ids, label_types)
 
 
 if __name__ == "__main__":

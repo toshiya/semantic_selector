@@ -11,22 +11,19 @@ def main():
         ./bin/infer_test
     '''
 
-    # training data is auto loaded during LsiModel initialization
-    model = ml_model.LsiModel(test_data_ratio=0.05)
-    print("failing inferences")
-    print(" estimated, correct, url")
+    (training, tests) = datasource.InputTags().fetch_data(0.05)
+    model = ml_model.LsiModel(training)
+    print("failing inferences\n")
+    print("estimated, correct")
     positive_hit = 0
     unknown_hit = 0
     unknown_cnt = 0
-    tests = model.test_data
     for t in tests:
         target_tag = t.html
         estimated_label = model.inference_html(target_tag)
         correct_label = t.label
         if estimated_label != correct_label:
-            print(estimated_label +
-                  "," + correct_label +
-                  "," + t.url)
+            print(estimated_label + "," + correct_label)
         if correct_label == 'unknown':
             unknown_cnt += 1
         if estimated_label == correct_label:
