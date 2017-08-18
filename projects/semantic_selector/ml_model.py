@@ -21,7 +21,7 @@ class LsiModel(object):
         (records, labels, label_types) = self.__fetch_training_data()
         self.answers = [r['words'] for r in records]
         self.label_types = label_types
-        self.label_ids = [ self._label_id(x) for x in labels ]
+        self.label_ids = [self._label_id(x) for x in labels]
 
         self.num_test_data = int(len(self.answers) * self.ratio_test_data)
         self.test_data = []
