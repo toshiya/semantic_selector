@@ -9,7 +9,7 @@ from semantic_selector import datasource
 
 class LsiModel(object):
 
-    def __init__(self, test_data_ratio=0, grouping=None):
+    def __init__(self, test_data_ratio=0):
         random.seed(int(time.time()))
         self.num_topics = 500
         self.ratio_test_data = test_data_ratio
@@ -17,16 +17,11 @@ class LsiModel(object):
         self.lr_solver = 'newton-cg'
         self.lr_max_iter = 10000
         self.lr_multi_class = 'ovr'
-        self.grouping = grouping
 
-        (records,
-         grouped_labels,
-         grouped_label_types) = self.__fetch_training_data()
+        (records, labels, label_types) = self.__fetch_training_data()
         self.answers = [r['words'] for r in records]
-        self.grouped_label_types = grouped_label_types
-        self.grouped_label_ids = [
-                self.grouped_label_id(x) for x in grouped_labels
-                ]
+        self.label_types = label_types
+        self.label_ids = [self._label_id(x) for x in labels]
 
         self.num_test_data = int(len(self.answers) * self.ratio_test_data)
         self.test_data = []
@@ -35,7 +30,7 @@ class LsiModel(object):
             if self.answers[random_index]:
                 self.test_data.append(records[random_index])
                 del self.answers[random_index]
-                del self.grouped_label_ids[random_index]
+                del self.label_ids[random_index]
 
         dictionary = corpora.Dictionary(self.answers)
         corpus = [dictionary.doc2bow(answer) for answer in self.answers]
@@ -50,10 +45,10 @@ class LsiModel(object):
         lr = LogisticRegression(solver=self.lr_solver,
                                 max_iter=self.lr_max_iter,
                                 multi_class=self.lr_multi_class)
-        lr.fit(X=lsi_corpus_flattened, y=self.grouped_label_ids)
+        lr.fit(X=lsi_corpus_flattened, y=self.label_ids)
 
         self.fitting_score = lr.score(X=lsi_corpus_flattened,
-                                      y=self.grouped_label_ids)
+                                      y=self.label_ids)
         self.dictionary = dictionary
         self.corpus = corpus
         self.lsi = lsi
@@ -68,23 +63,13 @@ class LsiModel(object):
             return 'unknown'
         else:
             predict_value = self.lr.predict([vec_lsi])[0]
-            return self.grouped_label_name_from_id(predict_value)
+            return self._label_name_from_id(predict_value)
 
-    def grouped_label_id(self, label_name):
-        grouped_label_name = self.grouped_label_name(label_name)
-        return self.grouped_label_types.index(grouped_label_name)
+    def _label_id(self, label):
+        return self.label_types.index(label)
 
-    def grouped_label_name_from_id(self, label_id):
-        return self.grouped_label_types[label_id]
-
-    def grouped_label_name(self, label_name):
-        if not self.grouping:
-            return label_name
-        else:
-            if label_name in self.grouping:
-                return self.grouping[label_name]
-            else:
-                return label_name
+    def _label_name_from_id(self, label_id):
+        return self.label_types[label_id]
 
     def __sparse_to_dense(self, vec):
         ret = [0 for e in range(self.num_topics)]
@@ -101,9 +86,8 @@ class LsiModel(object):
             words = input_tag_tokenizer.get_attrs_value(r['html'])
             r['words'] = words
             labels.append(r['label'])
-        grouped_labels = [self.grouped_label_name(l) for l in labels]
-        grouped_label_types = list(set(grouped_labels))
-        return (records, labels, grouped_label_types)
+        label_types = list(set(labels))
+        return (records, labels, label_types)
 
 
 if __name__ == "__main__":

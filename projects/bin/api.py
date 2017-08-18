@@ -10,11 +10,7 @@ app = Flask(__name__)
 
 def get_model():
     if not hasattr(g, 'model') or g.model is None:
-        label_file = "../../data/label_grouping_example.yml"
-        label_file = os.path.join(os.path.dirname(__file__), label_file)
-        with open(label_file) as f:
-            label_grouping = yaml.load(f.read())
-        g.model = ml_model.LsiModel(grouping=label_grouping)
+        g.model = ml_model.LsiModel()
     return g.model
 
 
