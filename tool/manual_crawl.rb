@@ -43,7 +43,7 @@ def urls()
 end
 
 def visited?(current_url)
-  urls.include?(current_url)
+  urls.map{ |a| a.split('?')[0] }.include?(current_url.split('?')[0])
 end
 
 def find_input_tags(driver)
