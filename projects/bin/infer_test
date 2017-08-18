@@ -8,17 +8,11 @@ from semantic_selector import datasource
 
 def main():
     '''
-        ./bin/infer_test [label grouping file]
+        ./bin/infer_test
     '''
-    import yaml
-    label_grouping = None
-    if len(sys.argv) > 1 and os.path.exists(sys.argv[1]):
-        path = sys.argv[1]
-        with open(path) as f:
-            label_grouping = yaml.load(f.read())
 
     # training data is auto loaded during LsiModel initialization
-    model = ml_model.LsiModel(grouping=label_grouping, test_data_ratio=0.05)
+    model = ml_model.LsiModel(test_data_ratio=0.05)
     print("failing inferences")
     print("html, estimated, correct")
     positive_hit = 0
@@ -28,7 +22,7 @@ def main():
     for t in test_records:
         target_tag = t['html']
         estimated_label = model.inference_html(target_tag)
-        correct_label = model.grouped_label_name(t['label'])
+        correct_label = t['label']
         if estimated_label != correct_label:
             print(t['html'].replace(',', '') +
                   ',' + estimated_label +
