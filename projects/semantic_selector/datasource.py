@@ -20,7 +20,7 @@ class Inputs(declarative_base()):
 
     def __repr__(self):
         return "<Input(url='%s', html='%s', label='%s')" % (
-                self.url ,self.html, self.label)
+                self.url, self.html, self.label)
 
 
 class InputTags(object):
@@ -43,7 +43,6 @@ class InputTags(object):
                 else:
                     training_data.append(r)
             return (training_data, test_data)
-
 
     instance = None
 

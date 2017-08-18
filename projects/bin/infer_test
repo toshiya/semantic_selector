@@ -14,7 +14,7 @@ def main():
     # training data is auto loaded during LsiModel initialization
     model = ml_model.LsiModel(test_data_ratio=0.05)
     print("failing inferences")
-    print("html, estimated, correct")
+    print(" estimated, correct, url")
     positive_hit = 0
     unknown_hit = 0
     unknown_cnt = 0
@@ -24,9 +24,9 @@ def main():
         estimated_label = model.inference_html(target_tag)
         correct_label = t.label
         if estimated_label != correct_label:
-            print(t.html.replace(',', '') +
-                  ',' + estimated_label +
-                  "," + correct_label)
+            print(estimated_label +
+                  "," + correct_label +
+                  "," + t.url)
         if correct_label == 'unknown':
             unknown_cnt += 1
         if estimated_label == correct_label:
