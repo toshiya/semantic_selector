@@ -18,13 +18,13 @@ def main():
     positive_hit = 0
     unknown_hit = 0
     unknown_cnt = 0
-    test_records = model.test_data
-    for t in test_records:
-        target_tag = t['html']
+    tests = model.test_data
+    for t in tests:
+        target_tag = t.html
         estimated_label = model.inference_html(target_tag)
-        correct_label = t['label']
+        correct_label = t.label
         if estimated_label != correct_label:
-            print(t['html'].replace(',', '') +
+            print(t.html.replace(',', '') +
                   ',' + estimated_label +
                   "," + correct_label)
         if correct_label == 'unknown':
@@ -36,15 +36,13 @@ def main():
                 positive_hit += 1
 
     print()
-    print("# of test data: " + str(len(model.test_data)))
-    print("# of training_data: " + str(len(model.answers)))
+    print("# of test data: " + str(len(tests)))
+    print("# of training_data: " + str(len(model.word_vecs)))
     print("# of vector elements: " + str(model.num_topics))
     print("Model Fitting Score,", model.fitting_score)
-    print("Accuracy,", ((positive_hit + unknown_hit) / len(test_records)))
-    print("Recall,", (positive_hit / (len(test_records) - unknown_cnt)))
-    print("unkown ratio in test data,", (unknown_cnt / len(test_records)))
-
-    datasource.InputTags.cleanup()
+    print("Accuracy,", ((positive_hit + unknown_hit) / len(tests)))
+    print("Recall,", (positive_hit / (len(tests) - unknown_cnt)))
+    print("unkown ratio in test data,", (unknown_cnt / len(tests)))
 
 
 if __name__ == '__main__':

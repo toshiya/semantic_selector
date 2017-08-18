@@ -18,6 +18,7 @@ MarkupSafe==1.0
 mecab-python3==0.7
 mysql-connector==2.1.4
 numpy==1.12.1
+pep8==1.7.0
 pexpect==4.2.1
 pickleshare==0.7.4
 prompt-toolkit==1.0.14
@@ -31,6 +32,7 @@ simplegeneric==0.8.1
 six==1.10.0
 sklearn==0.0
 smart-open==1.5.3
+SQLAlchemy==1.1.13
 traitlets==4.3.2
 urllib3==1.21.1
 virtualenv==15.1.0

@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import random
-import time
 from gensim import corpora, models, similarities
 from sklearn.linear_model import LogisticRegression
 from semantic_selector import tokenizer
@@ -10,7 +8,6 @@ from semantic_selector import datasource
 class LsiModel(object):
 
     def __init__(self, test_data_ratio=0):
-        random.seed(int(time.time()))
         self.num_topics = 500
         self.ratio_test_data = test_data_ratio
         self.training_data_table = 'inputs'
@@ -18,22 +15,13 @@ class LsiModel(object):
         self.lr_max_iter = 10000
         self.lr_multi_class = 'ovr'
 
-        (records, labels, label_types) = self.__fetch_training_data()
-        self.answers = [r['words'] for r in records]
-        self.label_types = label_types
-        self.label_ids = [self._label_id(x) for x in labels]
+        (self.word_vecs,
+         self.label_ids,
+         self.label_types,
+         self.test_data) = self.__fetch_training_data(self.ratio_test_data)
 
-        self.num_test_data = int(len(self.answers) * self.ratio_test_data)
-        self.test_data = []
-        for r in range(self.num_test_data):
-            random_index = random.randint(0, len(self.answers) - 1)
-            if self.answers[random_index]:
-                self.test_data.append(records[random_index])
-                del self.answers[random_index]
-                del self.label_ids[random_index]
-
-        dictionary = corpora.Dictionary(self.answers)
-        corpus = [dictionary.doc2bow(answer) for answer in self.answers]
+        dictionary = corpora.Dictionary(self.word_vecs)
+        corpus = [dictionary.doc2bow(word_vec) for word_vec in self.word_vecs]
         lsi = models.LsiModel(corpus,
                               id2word=dictionary,
                               num_topics=self.num_topics)
@@ -65,9 +53,6 @@ class LsiModel(object):
             predict_value = self.lr.predict([vec_lsi])[0]
             return self._label_name_from_id(predict_value)
 
-    def _label_id(self, label):
-        return self.label_types.index(label)
-
     def _label_name_from_id(self, label_id):
         return self.label_types[label_id]
 
@@ -77,17 +62,25 @@ class LsiModel(object):
             ret[v[0]] = v[1]
         return ret
 
-    def __fetch_training_data(self):
+    def __fetch_training_data(self, ratio_test_data):
         input_tag_tokenizer = tokenizer.InputTagTokenizer()
         input_tags = datasource.InputTags()
-        records = input_tags.fetch_all(self.training_data_table)
+        (training, test) = input_tags.fetch_data(ratio_test_data)
+
+        word_vecs = []
         labels = []
-        for r in records:
-            words = input_tag_tokenizer.get_attrs_value(r['html'])
-            r['words'] = words
-            labels.append(r['label'])
-        label_types = list(set(labels))
-        return (records, labels, label_types)
+        test_labels = []
+        for r in training:
+            word_vecs.append(input_tag_tokenizer.get_attrs_value(r.html))
+            labels.append(r.label)
+        for r in test:
+            test_labels.append(r.label)
+
+        # add labels only in test
+        label_types = list(set(labels + test_labels))
+        label_ids = [label_types.index(x) for x in labels]
+
+        return (word_vecs, label_ids, label_types, test)
 
 
 if __name__ == "__main__":
