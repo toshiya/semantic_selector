@@ -10,12 +10,11 @@ def db_setup
   ActiveRecord::Base.establish_connection(
     adapter: 'mysql2',
     host: 'localhost',
-    username: 'root',
-    password: '',
+    username: 'root', password: '',
     database: 'register_form',
   ) end
 
-def save(driver, node, label, new_definition=false)
+def save(node, label, new_definition=false)
   existing_labels = labels()
   unless (new_definition || existing_labels.include?(label))
     puts "#{label} is newly defined? is it ok?"
@@ -23,7 +22,7 @@ def save(driver, node, label, new_definition=false)
     return
   end
 
-  url = driver.current_url
+  url = $driver.current_url
   html = node.attribute('outerHTML')
   parent_html = node.find_element(:xpath, "..").attribute('outerHTML')
   Input.create(
@@ -46,20 +45,20 @@ def visited?(current_url)
   urls.map{ |a| a.split('?')[0] }.include?(current_url.split('?')[0])
 end
 
-def find_input_tags(driver)
-  driver.find_elements(:xpath, '//input[not(@type="hidden")]')
+def find_input_tags
+  $driver.find_elements(:xpath, '//input[not(@type="hidden")]')
 end
 
-def find_radio_box(driver)
-  driver.find_elements(:xpath, '//input[@type="radio"]')
+def find_radio_box
+  $driver.find_elements(:xpath, '//input[@type="radio"]')
 end
 
-def find_select_box(driver)
-  driver.find_elements(:xpath, '//select[not(@type="hidden")]')
+def find_select_box
+  $driver.find_elements(:xpath, '//select[not(@type="hidden")]')
 end
 
-def find_check_box(driver)
-  driver.find_elements(:xpath, '//input[@type="checkbox"]')
+def find_check_box
+  $driver.find_elements(:xpath, '//input[@type="checkbox"]')
 end
 
 def fill_input_tags(input_tags)
@@ -74,11 +73,32 @@ def fill_input_tags(input_tags)
 end
 
 def click_by_js(driver, element)
-  driver.execute_script("return arguments[0].click()", element)
+  $driver.execute_script("return arguments[0].click()", element)
+end
+
+def load_highliter()
+  script = 'var script = document.createElement("script"); script.type = "text/javascript"; script.src = "https://toshiya.github.io/semantic_selector/static/highlighter.min.js"; document.head.appendChild(script);'
+  $driver.execute_script(script)
+
+  sleep(2)
+
+  script = 'window.myHighliter = new window.Highlighter({"color":"red"});'
+  $driver.execute_script(script)
+end
+
+# TODO: support radio. same name may be used for multiple input tags
+def highlight_by_name(name)
+  script = "var element = document.getElementsByName(\"#{name}\")[0]; window.myHighliter.point(element);window.myHighliter.underline();"
+  $driver.execute_script(script)
+end
+
+def erase_by_name(name)
+  script = "var element = document.getElementsByName(\"#{name}\")[0]; window.myHighliter.point(element);window.myHighliter.erase();"
+  $driver.execute_script(script)
 end
 
 db_setup()
-driver = Selenium::WebDriver.for :chrome
+$driver = Selenium::WebDriver.for :chrome
 
 binding.pry
-driver.quit
+$driver.quit
