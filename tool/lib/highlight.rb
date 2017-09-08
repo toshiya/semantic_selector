@@ -10,7 +10,6 @@ module Highlight
     $driver.execute_script(script)
   end
 
-  # TODO: support radio. same name may be used for multiple input tags
   def highlight_by_name(name)
     script = <<SCRIPT
     var elements = document.getElementsByName(\"#{name}\");
