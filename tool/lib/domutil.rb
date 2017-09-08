@@ -4,5 +4,10 @@ module DOMUtil
     elements.concat(driver.find_elements(:xpath, '//select[not(@type="hidden")]'))
   end
 
-  module_function :find_input_tags
+
+  def find_labels_by_id(id)
+    $driver.find_elements(:xpath, '//label[@for="' + id + '"]')
+  end
+
+  module_function :find_input_tags, :find_labels_by_id
 end
