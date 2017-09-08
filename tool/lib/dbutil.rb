@@ -1,3 +1,5 @@
+require 'active_record'
+ActiveRecord::Base.default_timezone = :local
 class Input < ActiveRecord::Base
   self.table_name = 'inputs'
 end
@@ -12,8 +14,8 @@ module DBUtil
     )
   end
 
-  def save(url, tag, label)
-    url = $driver.current_url
+  def save(driver, tag, label)
+    url = driver.current_url
     html = tag.attribute('outerHTML')
     parent_html = tag.find_element(:xpath, "..").attribute('outerHTML')
     Input.create(

@@ -12,12 +12,24 @@ module Highlight
 
   # TODO: support radio. same name may be used for multiple input tags
   def highlight_by_name(name)
-    script = "var element = document.getElementsByName(\"#{name}\")[0]; window.myHighliter.point(element);window.myHighliter.underline();"
+    script = <<SCRIPT
+    var elements = document.getElementsByName(\"#{name}\");
+    elements.forEach(function(element) {
+      window.myHighliter.point(element);
+      window.myHighliter.underline();
+    })
+SCRIPT
     $driver.execute_script(script)
   end
 
   def erase_by_name(name)
-    script = "var element = document.getElementsByName(\"#{name}\")[0]; window.myHighliter.point(element);window.myHighliter.erase();"
+    script = <<SCRIPT
+    var elements = document.getElementsByName(\"#{name}\");
+    elements.forEach(function(element) {
+      window.myHighliter.point(element);
+      window.myHighliter.erase();
+    })
+SCRIPT
     $driver.execute_script(script)
   end
 

@@ -1,68 +1,148 @@
+require 'readline'
 require 'selenium-webdriver'
-require 'active_record'
-require 'pry'
+require 'colorize'
 require_relative './lib/domutil'
 require_relative './lib/dbutil'
 require_relative './lib/highlight'
+
+LIST = [
+  # available commands
+  "load_page",
+  "collect",
+  # common labels
+  "mail_delivery",
+  "pc_email",
+  "gender",
+  "password",
+  "family_name",
+  "first_name",
+  "password_confirmation",
+  "family_name_furigana",
+  "first_name_furigana",
+  "birthday_year",
+  "birthday_month",
+  "birthday_day",
+  "address_town",
+  "address_building",
+  "address_street",
+  "pc_email_confirmation",
+  "phone_number",
+  "prefecture",
+  "phone_number_first",
+  "phone_number_middle",
+  "phone_number_last",
+  "postal_code",
+  "job",
+  "postal_code_first",
+  "postal_code_last",
+  "entry_path",
+  "questionnaire",
+  "service_term",
+  "user_id",
+  "company_name",
+  "user_type",
+  "company_department",
+  "other",
+]
+
+comp = proc { |s| LIST.grep(/^#{Regexp.escape(s)}/) }
+Readline.completion_append_character = " "
+Readline.completion_proc = comp
+
+def put_q(msg)
+  puts msg.green
+end
+
+def put_w(msg)
+  puts msg.red
+end
+
+def put_n(msg)
+  puts msg.blue
+end
 
 lambda {
   Kernel.module_eval do
     define_method :load_page do |url|
       $driver.get(url)
       if DBUtil.visited?($driver.current_url)
-        puts "[WARN] this page has already been visited? continue?"
+        put_w "[WARN] this page has already been visited? continue?"
       end
 
       Highlight.load_highliter()
     end
 
     # Interactive Shell based on inference
-    define_method :collect do
+    define_method :collect do |start_index=0|
+      start_index ||= 0
       tags = DOMUtil.find_input_tags($driver)
 
-      tags.each do |tag|
+      put_n "total: #{tags.length} foroms found"
+
+      tags.each_with_index do |tag, index|
+        if start_index > index
+          next
+        end
+
         existing_labels = DBUtil.labels() || []
         name = tag.attribute('name')
         Highlight.highlight_by_name(name)
 
-        puts "HTML"
-        puts tag.attribute('outerHTML')
+        put_n "#{index}/#{tags.length}"
+        put_n "HTML"
+        put_n tag.attribute('outerHTML')
         infered_label = "pc_email"
-        puts "LABEL: #{infered_label}, is it OK? or Input correct label"
+        put_w "LABEL: #{infered_label}.".red
+        put_q "OK ? then press [enter]. or Input correct label and [enter]"
 
-        prompt = STDIN.gets.chomp.downcase
+        prompt = Readline.readline('> ', true).strip
         while prompt.length > 0
           case prompt
-          when "labels"
-            puts "...listing all lables"
-            puts existing_labels
-            puts "input new label"
-            prompt = STDIN.gets.chomp.downcase
+          when "exit"
+            return
+          when "s","skip"
+            infered_label = "skip"
+            break
+          when "l", "labels"
+            put_n "...listing all lables"
+            existing_labels.each do |label|
+              put_n label
+            end
+            put_q "input new label"
+            prompt = Readline.readline('> ', true).strip
             next
           else
-            new_label = prompt
-            unless existing_labels.include?(new_label)
-              puts "this is new label. is it OK ? if not, press [n]"
-              answer = STDIN.gets.chomp.downcase
+            infered_label = prompt
+            unless existing_labels.include?(infered_label)
+              put_w "[WARN] This label is not in the current DB."
+              put_q "OK? if not, press [n]"
+              answer = Readline.readline('> ', true).strip
               unless ["", "y", "yes"].include?(answer)
-                puts "input new label"
-                prompt = STDIN.gets.chomp.downcase
+                put_q "input new label"
+                prompt = Readline.readline('> ', true).strip
                 next
               end
             end
-            infered_label = new_label
-            puts "new_label: #{infered_label}"
             break
           end
         end
 
+        if infered_label == "skip"
+          Highlight.erase_by_name(name)
+          put_n "...skiped"
+          put_n ""
+          next
+        end
+
+        put_n "new_label: #{infered_label}".blue
         Highlight.erase_by_name(name)
-        DBUtil.save($driver.current_url, tag, infered_label)
-        puts "...saved"
-        puts
+        DBUtil.save($driver, tag, infered_label)
+        put_n "...saved"
+        put_n ""
       end
 
-      puts "...labeling finsihed"
+      put_n "...labeling finsihed"
+      puts
     end
 
     # show recorded tags for the current page
@@ -79,6 +159,14 @@ lambda {
 DBUtil.db_setup()
 $driver = Selenium::WebDriver.for :chrome
 
-binding.pry
+while cmd = Readline.readline('> ', true).strip
+  put_n cmd
+  begin
+    eval(cmd)
+  rescue => e
+    put_w "[error] fail"
+    put_w e.to_s.red
+  end
+end
 
 $driver.quit
