@@ -1,104 +1,84 @@
 require 'selenium-webdriver'
 require 'active_record'
 require 'pry'
+require_relative './lib/domutil'
+require_relative './lib/dbutil'
+require_relative './lib/highlight'
 
-class Input < ActiveRecord::Base
-  self.table_name = 'inputs'
-end
+lambda {
+  Kernel.module_eval do
+    define_method :load_page do |url|
+      $driver.get(url)
+      if DBUtil.visited?($driver.current_url)
+        puts "[WARN] this page has already been visited? continue?"
+      end
 
-def db_setup
-  ActiveRecord::Base.establish_connection(
-    adapter: 'mysql2',
-    host: 'localhost',
-    username: 'root', password: '',
-    database: 'register_form',
-  ) end
+      Highlight.load_highliter()
+    end
 
-def save(node, label, new_definition=false)
-  existing_labels = labels()
-  unless (new_definition || existing_labels.include?(label))
-    puts "#{label} is newly defined? is it ok?"
-    puts "set new_definition flag as save(driver, node, label, true)"
-    return
-  end
+    # Interactive Shell based on inference
+    define_method :collect do
+      tags = DOMUtil.find_input_tags($driver)
 
-  url = $driver.current_url
-  html = node.attribute('outerHTML')
-  parent_html = node.find_element(:xpath, "..").attribute('outerHTML')
-  Input.create(
-    url: url,
-    html: html,
-    parent_html: parent_html,
-    label: label
-  )
-end
+      tags.each do |tag|
+        existing_labels = DBUtil.labels() || []
+        name = tag.attribute('name')
+        Highlight.highlight_by_name(name)
 
-def labels()
-  Input.select('label').group('label').map(&:label)
-end
+        puts "HTML"
+        puts tag.attribute('outerHTML')
+        infered_label = "pc_email"
+        puts "LABEL: #{infered_label}, is it OK? or Input correct label"
 
-def urls()
-  Input.select('url').group('url').map(&:url)
-end
+        prompt = STDIN.gets.chomp.downcase
+        while prompt.length > 0
+          case prompt
+          when "labels"
+            puts "...listing all lables"
+            puts existing_labels
+            puts "input new label"
+            prompt = STDIN.gets.chomp.downcase
+            next
+          else
+            new_label = prompt
+            unless existing_labels.include?(new_label)
+              puts "this is new label. is it OK ? if not, press [n]"
+              answer = STDIN.gets.chomp.downcase
+              unless ["", "y", "yes"].include?(answer)
+                puts "input new label"
+                prompt = STDIN.gets.chomp.downcase
+                next
+              end
+            end
+            infered_label = new_label
+            puts "new_label: #{infered_label}"
+            break
+          end
+        end
 
-def visited?(current_url)
-  urls.map{ |a| a.split('?')[0] }.include?(current_url.split('?')[0])
-end
+        Highlight.erase_by_name(name)
+        DBUtil.save($driver.current_url, tag, infered_label)
+        puts "...saved"
+        puts
+      end
 
-def find_input_tags
-  $driver.find_elements(:xpath, '//input[not(@type="hidden")]')
-end
+      puts "...labeling finsihed"
+    end
 
-def find_radio_box
-  $driver.find_elements(:xpath, '//input[@type="radio"]')
-end
+    # show recorded tags for the current page
+    define_method :show do
+    end
 
-def find_select_box
-  $driver.find_elements(:xpath, '//select[not(@type="hidden")]')
-end
-
-def find_check_box
-  $driver.find_elements(:xpath, '//input[@type="checkbox"]')
-end
-
-def fill_input_tags(input_tags)
-  input_tags.each_with_index do |e, i|
-    next unless e.displayed?
-    begin
-      e.send_keys i.to_s
-    rescue => e
-      puts e
+    # edit a label of the record at the given index
+    define_method :edit do |index|
     end
   end
-end
 
-def click_by_js(driver, element)
-  $driver.execute_script("return arguments[0].click()", element)
-end
+}.call
 
-def load_highliter()
-  script = 'var script = document.createElement("script"); script.type = "text/javascript"; script.src = "https://toshiya.github.io/semantic_selector/static/highlighter.min.js"; document.head.appendChild(script);'
-  $driver.execute_script(script)
-
-  sleep(2)
-
-  script = 'window.myHighliter = new window.Highlighter({"color":"red"});'
-  $driver.execute_script(script)
-end
-
-# TODO: support radio. same name may be used for multiple input tags
-def highlight_by_name(name)
-  script = "var element = document.getElementsByName(\"#{name}\")[0]; window.myHighliter.point(element);window.myHighliter.underline();"
-  $driver.execute_script(script)
-end
-
-def erase_by_name(name)
-  script = "var element = document.getElementsByName(\"#{name}\")[0]; window.myHighliter.point(element);window.myHighliter.erase();"
-  $driver.execute_script(script)
-end
-
-db_setup()
+DBUtil.db_setup()
 $driver = Selenium::WebDriver.for :chrome
 
 binding.pry
+
 $driver.quit
