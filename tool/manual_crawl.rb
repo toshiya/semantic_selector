@@ -1,84 +1,172 @@
+require 'readline'
 require 'selenium-webdriver'
-require 'active_record'
-require 'pry'
+require 'colorize'
+require_relative './lib/domutil'
+require_relative './lib/dbutil'
+require_relative './lib/highlight'
 
-class Input < ActiveRecord::Base
-  self.table_name = 'inputs'
+LIST = [
+  # available commands
+  "load_page",
+  "collect",
+  # common labels
+  "mail_delivery",
+  "pc_email",
+  "gender",
+  "password",
+  "family_name",
+  "first_name",
+  "password_confirmation",
+  "family_name_furigana",
+  "first_name_furigana",
+  "birthday_year",
+  "birthday_month",
+  "birthday_day",
+  "address_town",
+  "address_building",
+  "address_street",
+  "pc_email_confirmation",
+  "phone_number",
+  "prefecture",
+  "phone_number_first",
+  "phone_number_middle",
+  "phone_number_last",
+  "postal_code",
+  "job",
+  "postal_code_first",
+  "postal_code_last",
+  "entry_path",
+  "questionnaire",
+  "service_term",
+  "user_id",
+  "company_name",
+  "user_type",
+  "company_department",
+  "other",
+]
+
+comp = proc { |s| LIST.grep(/^#{Regexp.escape(s)}/) }
+Readline.completion_append_character = " "
+Readline.completion_proc = comp
+
+def put_q(msg)
+  puts msg.green
 end
 
-def db_setup
-  ActiveRecord::Base.establish_connection(
-    adapter: 'mysql2',
-    host: 'localhost',
-    username: 'root',
-    password: '',
-    database: 'register_form',
-  ) end
-
-def save(driver, node, label, new_definition=false)
-  existing_labels = labels()
-  unless (new_definition || existing_labels.include?(label))
-    puts "#{label} is newly defined? is it ok?"
-    puts "set new_definition flag as save(driver, node, label, true)"
-    return
-  end
-
-  url = driver.current_url
-  html = node.attribute('outerHTML')
-  parent_html = node.find_element(:xpath, "..").attribute('outerHTML')
-  Input.create(
-    url: url,
-    html: html,
-    parent_html: parent_html,
-    label: label
-  )
+def put_w(msg)
+  puts msg.red
 end
 
-def labels()
-  Input.select('label').group('label').map(&:label)
+def put_n(msg)
+  puts msg.blue
 end
 
-def urls()
-  Input.select('url').group('url').map(&:url)
-end
+lambda {
+  Kernel.module_eval do
+    define_method :load_page do |url|
+      $driver.get(url)
+      if DBUtil.visited?($driver.current_url)
+        put_w "[WARN] this page has already been visited? continue?"
+      end
 
-def visited?(current_url)
-  urls.map{ |a| a.split('?')[0] }.include?(current_url.split('?')[0])
-end
+      Highlight.load_highliter()
+    end
 
-def find_input_tags(driver)
-  driver.find_elements(:xpath, '//input[not(@type="hidden")]')
-end
+    # Interactive Shell based on inference
+    define_method :collect do |start_index=0|
+      start_index ||= 0
+      tags = DOMUtil.find_input_tags($driver)
 
-def find_radio_box(driver)
-  driver.find_elements(:xpath, '//input[@type="radio"]')
-end
+      put_n "total: #{tags.length} foroms found"
 
-def find_select_box(driver)
-  driver.find_elements(:xpath, '//select[not(@type="hidden")]')
-end
+      tags.each_with_index do |tag, index|
+        if start_index > index
+          next
+        end
 
-def find_check_box(driver)
-  driver.find_elements(:xpath, '//input[@type="checkbox"]')
-end
+        existing_labels = DBUtil.labels() || []
+        name = tag.attribute('name')
+        Highlight.highlight_by_name(name)
 
-def fill_input_tags(input_tags)
-  input_tags.each_with_index do |e, i|
-    next unless e.displayed?
-    begin
-      e.send_keys i.to_s
-    rescue => e
-      puts e
+        put_n "#{index}/#{tags.length}"
+        put_n "HTML"
+        put_n tag.attribute('outerHTML')
+        infered_label = "pc_email"
+        put_w "LABEL: #{infered_label}.".red
+        put_q "OK ? then press [enter]. or Input correct label and [enter]"
+
+        prompt = Readline.readline('> ', true).strip
+        while prompt.length > 0
+          case prompt
+          when "exit"
+            return
+          when "s","skip"
+            infered_label = "skip"
+            break
+          when "l", "labels"
+            put_n "...listing all lables"
+            existing_labels.each do |label|
+              put_n label
+            end
+            put_q "input new label"
+            prompt = Readline.readline('> ', true).strip
+            next
+          else
+            infered_label = prompt
+            unless existing_labels.include?(infered_label)
+              put_w "[WARN] This label is not in the current DB."
+              put_q "OK? if not, press [n]"
+              answer = Readline.readline('> ', true).strip
+              unless ["", "y", "yes"].include?(answer)
+                put_q "input new label"
+                prompt = Readline.readline('> ', true).strip
+                next
+              end
+            end
+            break
+          end
+        end
+
+        if infered_label == "skip"
+          Highlight.erase_by_name(name)
+          put_n "...skiped"
+          put_n ""
+          next
+        end
+
+        put_n "new_label: #{infered_label}".blue
+        Highlight.erase_by_name(name)
+        DBUtil.save($driver, tag, infered_label)
+        put_n "...saved"
+        put_n ""
+      end
+
+      put_n "...labeling finsihed"
+      puts
+    end
+
+    # show recorded tags for the current page
+    define_method :show do
+    end
+
+    # edit a label of the record at the given index
+    define_method :edit do |index|
     end
   end
+
+}.call
+
+DBUtil.db_setup()
+$driver = Selenium::WebDriver.for :chrome
+
+while cmd = Readline.readline('> ', true).strip
+  put_n cmd
+  begin
+    eval(cmd)
+  rescue => e
+    put_w "[error] fail"
+    put_w e.to_s.red
+  end
 end
 
-def click_by_js(driver, element)
-  driver.execute_script("return arguments[0].click()", element)
-end
-
-db_setup()
-driver = Selenium::WebDriver.for :chrome
-
-binding.pry
-driver.quit
+$driver.quit
