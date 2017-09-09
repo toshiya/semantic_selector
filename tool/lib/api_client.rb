@@ -12,7 +12,6 @@ class ApiClient
       req.headers['Content-Type'] = 'application/json'
       req.body = JSON.generate({html: html})
     end
-    p response
     result = "unknown"
     if response.success?
       body = JSON.parse(response.body, {:symbolize_names => true})
