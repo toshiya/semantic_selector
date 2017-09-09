@@ -6,22 +6,19 @@ import os
 import yaml
 
 app = Flask(__name__)
+model = None
 
-
-def get_model():
-    if not hasattr(g, 'model') or g.model is None:
-        g.model = ml_model.LsiModel()
-    return g.model
-
-
-@app.teardown_appcontext
-def close_db(error):
-    if hasattr(g, 'model') and g.model is not None:
-        datasource.InputTags.cleanup()
+@app.before_first_request
+def startup():
+    global model
+    print("initializing model...")
+    (training, tests) = datasource.InputTags().fetch_data(0.00)
+    model = ml_model.LsiModel(training)
 
 
 @app.route("/api/inference", methods=['POST'])
 def inference():
+    global model
     if request.headers['Content-Type'] != 'application/json':
         return make_response("Content-Type must be application/json", 400)
 
@@ -30,7 +27,6 @@ def inference():
         return make_response(err_message, 400)
 
     target_tag = request.json["html"]
-    model = get_model()
     estimated_label = model.inference_html(target_tag)
     res = {"label": estimated_label}
     return jsonify(res)
