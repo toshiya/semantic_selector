@@ -4,10 +4,12 @@ require 'colorize'
 require_relative './lib/domutil'
 require_relative './lib/dbutil'
 require_relative './lib/highlight'
+require_relative './lib/api_client'
 
 LIST = [
   # available commands
   "load_page",
+  "load_highliter",
   "collect",
   # common labels
   "mail_delivery",
@@ -72,6 +74,10 @@ lambda {
       Highlight.load_highliter()
     end
 
+    define_method :load_highliter do
+      Highlight.load_highliter()
+    end
+
     # Interactive Shell based on inference
     define_method :collect do |start_index=0|
       start_index ||= 0
@@ -84,17 +90,18 @@ lambda {
           next
         end
 
-        existing_labels = DBUtil.labels() || []
         name = tag.attribute('name')
+        html = tag.attribute('outerHTML')
+        infered_label = $api_client.inference_html(html)
         Highlight.highlight_by_name(name)
 
         put_n "#{index}/#{tags.length}"
         put_n "HTML"
-        put_n tag.attribute('outerHTML')
-        infered_label = "pc_email"
+        put_n html
         put_w "LABEL: #{infered_label}.".red
         put_q "OK ? then press [enter]. or Input correct label and [enter]"
 
+        existing_labels = DBUtil.labels() || []
         prompt = Readline.readline('> ', true).strip
         while prompt.length > 0
           case prompt
@@ -158,6 +165,7 @@ lambda {
 
 DBUtil.db_setup()
 $driver = Selenium::WebDriver.for :chrome
+$api_client = ApiClient.new()
 
 while cmd = Readline.readline('> ', true).strip
   put_n cmd

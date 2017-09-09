@@ -2,7 +2,7 @@ require_relative './domutil'
 require 'active_record'
 ActiveRecord::Base.default_timezone = :local
 class Input < ActiveRecord::Base
-  self.table_name = 'test_inputs'
+  self.table_name = 'inputs'
 end
 
 module DBUtil
@@ -16,6 +16,7 @@ module DBUtil
   end
 
   def save(driver, tag, label)
+    title = driver.title
     url = driver.current_url
     html = tag.attribute('outerHTML')
     parent_html = tag.find_element(:xpath, "..").attribute('outerHTML')
@@ -29,6 +30,7 @@ module DBUtil
     end
 
     Input.create(
+      title: title,
       url: url,
       html: html,
       parent_html: parent_html,
