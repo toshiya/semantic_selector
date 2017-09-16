@@ -24,16 +24,18 @@ pip3 install -r projects/requirements.txt
 ```bash
 $ PYTHONPATH=projects  ./projects/bin/infer_test
 failing inferences
-html, estimated, correct
-<input style="float: right; margin-right: 115px; width: 320px;" placeholder="もう一度パスワードを入力" type="password" name="password_cfm" id="" ng-model="password_cfm" ng-required="true" match="password" class="ng-invalid ng-dirty ng-valid-parse ng-valid-required ng-invalid-mismatch ng-touched" required="required">,password,password_confirmation
-<input type="checkbox" class="use-cookie-personalization-field hidden" name="user[use_cookie_personalization]" value="1" style="display: inline-block;">,service_term,user_customization
 
-# of test data: 39
-# of training_data: 757
+estimated, correct
+address_street,address_building
+...
+birthday_month,month
+
+# of test data: 154
+# of training_data: 3358
 # of vector elements: 500
-Model Fitting Score, 0.948480845443
-Accuracy, 0.9487179487179487
-Recall, 0.9487179487179487
+Model Fitting Score, 0.868969624777
+Accuracy, 0.7012987012987013
+Recall, 0.7012987012987013
 unkown ratio in test data, 0.0
 ```
 
