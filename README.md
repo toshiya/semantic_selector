@@ -44,7 +44,7 @@ cd projects
 PYTHONPATH=. FLASK_APP=./bin/api.py flask run
 
 # call it in another console
-curl -X POST -H "Content-Type: application/json" http://localhost/api/inference -d '{ "html" : "<input type='text' name='mail_addr' placeholder='メールアドレス'>"}'
+curl -X POST -H "Content-Type: application/json" http://localhost:5000/api/inference -d '{ "html" : "<input type='text' name='mail_addr' placeholder='メールアドレス'>"}'
 ```
 
 # Collect new training data
@@ -60,16 +60,16 @@ bundle install --path vendor/bundle
 
 mysql.server start
 
-# start api server, used by interactive shell to infere labels.
+# start api server, used by interactive shell to infer labels.
 cd projects
 PYTHONPATH=. FLASK_APP=./bin/api.py flask run
 
-# open antther tab and start interactive shell
+# open another tab and start interactive shell
 bundle exec -- ruby manual_crawl.rb
 
 $ load_page "https://www.muji.net/store/cust/useradd/fullinfo?beforeUrl=terms"
 
-# start interactive shell for labeling
+# start labeling for the loaded page
 $ collect
 ```
 
