@@ -13,7 +13,7 @@ mysql -uxxx -p register_form < data/register_form.sql
 # python3.5+
 pyenv install 3.5.2
 pyenv local 3.5.2
-python3.6 -m venv venv
+python -m venv venv
 source venv/bin/activate
 pip3 install -r projects/requirements.txt
 
@@ -59,31 +59,18 @@ gem install bundler
 bundle install --path vendor/bundle
 
 mysql.server start
+
+# start api server, used by interactive shell to infere labels.
+cd projects
+PYTHONPATH=. FLASK_APP=./bin/api.py flask run
+
+# open antther tab and start interactive shell
 bundle exec -- ruby manual_crawl.rb
 
-$ driver.navigate.to "https://www.muji.net/store/cust/useradd/fullinfo?beforeUrl=terms"
+$ load_page "https://www.muji.net/store/cust/useradd/fullinfo?beforeUrl=terms"
 
-# check the url has been already visited?
-$ visited?(driver.current_url)
-
-$ inputs = find_input_tags(driver)
-$ fill_input_tags(inputs)
-# check the filled numbers in your browser, and save the form with the label.
-# then, labeled data will be in your local mysql.
-$ save(driver, inputs[2], "pc_email")
-
-$ radios = find_radio_box(driver)
-$ radios[0].click()
-$ save(driver, radios[0], "gender")
-
-$ selects = find_select_box(driver)
-$ selects[0].click()
-$ save(driver, selects[0], "birhtday_year")
-
-$ checks = find_check_box(driver)
-$ checks[0].click()
-$ save(driver, checks[0], "mail_delivery")
-
-# if the element is hidden, use js to click.
-$ click_by_js(driver, radios[0])
+# start interactive shell for labeling
+$ collect
 ```
+
+
