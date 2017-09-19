@@ -50,7 +50,7 @@ class InputTags(object):
             if os.getenv('N_TEST_DATA'):
                 perm = [int(x) for x in os.getenv('N_TEST_DATA').split(',')]
             else:
-                perm = np.random.permutation(int(n * ratio_test_data))
+                perm = np.random.permutation(n)[0:int(n * ratio_test_data)]
                 print("export N_TEST_DATA=%s" % ','.join([str(x) for x in perm]))
             test_data = [all_data[i] for i in perm]
             training_data = [all_data[i] for i in range(0,n) if i not in perm]

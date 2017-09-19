@@ -20,7 +20,7 @@ def main():
     args = parser.parse_args()
 
     (training, tests) = datasource.InputTags(args.threashold).fetch_data(args.ratio_test)
-    model = chainer_model.ChainerModel(training)
+    model = chainer_model.ChainerModel(training, tests)
 
     print("failing inferences\n")
     print("estimated, correct")
