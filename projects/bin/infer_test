@@ -2,8 +2,10 @@
 import sys
 import os
 import yaml
+import argparse
 from semantic_selector import ml_model
 from semantic_selector import datasource
+
 
 
 def main():
@@ -11,7 +13,12 @@ def main():
         ./bin/infer_test
     '''
 
-    (training, tests) = datasource.InputTags(10).fetch_data(0.05)
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('--threashold', type=int, nargs='?', help='a threashold of the number of labels', default=10)
+    parser.add_argument('--ratio_test', type=float, nargs='?', help='a ratio of test sets', default=0.05)
+    args = parser.parse_args()
+
+    (training, tests) = datasource.InputTags(args.threashold).fetch_data(args.ratio_test)
     model = ml_model.LsiModel(training)
     print("failing inferences\n")
     print("estimated, correct")

@@ -39,11 +39,14 @@ class InputTags(object):
             test_data = []
             sql = '''
             select * from inputs
-                         where label IN
-                         (select label from inputs group by label having count(1) > :threshold)
-                         order by id
+                     where label IN
+                     (select label from inputs
+                                   group by label
+                                   having count(1) > :threshold)
+                     order by id
 '''
-            for r in self.session.execute(sql, { 'threshold' : self.exclude_threshold }):
+            vals = {'threshold': self.exclude_threshold}
+            for r in self.session.execute(sql, vals):
                 rand = random.randint(0, 100)
                 if (rand < 100 * ratio_test_data):
                     test_data.append(r)
