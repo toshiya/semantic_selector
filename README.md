@@ -22,20 +22,20 @@ pip3 install -r projects/requirements.txt
 # Inference
 
 ```bash
-$ PYTHONPATH=projects  ./projects/bin/infer_test
+$ PYTHONPATH=projects  ./projects/bin/infer_test --threashold 10 --ratio_test 0.05
 failing inferences
 
 estimated, correct
-address_street,address_building
+family_name,address_town
 ...
-birthday_month,month
+address_town,address_street
 
 # of test data: 154
-# of training_data: 3358
+# of training_data: 3108
 # of vector elements: 500
-Model Fitting Score, 0.868969624777
-Accuracy, 0.7012987012987013
-Recall, 0.7012987012987013
+Model Fitting Score, 0.90444015444
+Accuracy, 0.7987012987012987
+Recall, 0.7987012987012987
 unkown ratio in test data, 0.0
 ```
 
