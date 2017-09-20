@@ -11,7 +11,7 @@ def main():
         ./bin/infer_test
     '''
 
-    (training, tests) = datasource.InputTags().fetch_data(0.05)
+    (training, tests) = datasource.InputTags(10).fetch_data(0.05)
     model = ml_model.LsiModel(training)
     print("failing inferences\n")
     print("estimated, correct")

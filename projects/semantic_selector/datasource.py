@@ -25,18 +25,25 @@ class Inputs(declarative_base()):
 
 class InputTags(object):
     class __InputTags:
-        def __init__(self):
+        def __init__(self, exclude_threshold):
             random.seed(int(time.time()))
             self.engine = create_engine(
                     'mysql+mysqlconnector://root:@localhost/register_form',
                     echo=False)
             self.Session = sessionmaker(bind=self.engine)
             self.session = self.Session()
+            self.exclude_threshold = exclude_threshold
 
         def fetch_data(self, ratio_test_data):
             training_data = []
             test_data = []
-            for r in self.session.query(Inputs).order_by(Inputs.id):
+            sql = '''
+            select * from inputs
+                         where label IN
+                         (select label from inputs group by label having count(1) > :threshold)
+                         order by id
+'''
+            for r in self.session.execute(sql, { 'threshold' : self.exclude_threshold }):
                 rand = random.randint(0, 100)
                 if (rand < 100 * ratio_test_data):
                     test_data.append(r)
@@ -46,9 +53,9 @@ class InputTags(object):
 
     instance = None
 
-    def __init__(self):
+    def __init__(self, exclude_threshold=10):
         if not InputTags.instance:
-            InputTags.instance = InputTags.__InputTags()
+            InputTags.instance = InputTags.__InputTags(exclude_threshold)
 
     def __getattr__(self, name):
         return getattr(self.instance, name)
