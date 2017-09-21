@@ -23,7 +23,7 @@ from chainer.training import extensions
 from chainer.datasets import tuple_dataset
 
 BATCH_SIZE = int(os.getenv('BATCH_SIZE', '200'))
-N_EPOCH    = int(os.getenv('N_EPOCH',    '200'))
+N_EPOCH    = int(os.getenv('N_EPOCH',    '150'))
 N_UNITS_1  = int(os.getenv('N_UNITS_1',  '300'))
 N_UNITS_2  = int(os.getenv('N_UNITS_2',  '100'))
 DROPOUT    = int(os.getenv('DROPOUT',    '0'))
