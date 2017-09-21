@@ -23,11 +23,11 @@ from chainer.training import extensions
 from chainer.datasets import tuple_dataset
 
 BATCH_SIZE = int(os.getenv('BATCH_SIZE', '200'))
-N_EPOCH    = int(os.getenv('N_EPOCH',    '100'))
-N_UNITS_1  = int(os.getenv('N_UNITS_1',  '800'))
-N_UNITS_2  = int(os.getenv('N_UNITS_2',  '200'))
-DROPOUT    = int(os.getenv('DROPOUT',    '1'))
-RELU       = int(os.getenv('RELU',       '1'))
+N_EPOCH    = int(os.getenv('N_EPOCH',    '200'))
+N_UNITS_1  = int(os.getenv('N_UNITS_1',  '300'))
+N_UNITS_2  = int(os.getenv('N_UNITS_2',  '100'))
+DROPOUT    = int(os.getenv('DROPOUT',    '0'))
+RELU       = int(os.getenv('RELU',       '0'))
 
 class Model(Chain):
     def __init__(self, in_units, out_units, n_units_1 = N_UNITS_1, n_units_2 = N_UNITS_2):
