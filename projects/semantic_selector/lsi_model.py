@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from gensim import corpora, models, similarities
+from gensim import corpora, models
 from sklearn.linear_model import LogisticRegression
 from semantic_selector import tokenizer
 from semantic_selector import datasource

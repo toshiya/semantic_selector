@@ -3,9 +3,8 @@ import sys
 import os
 import yaml
 import argparse
-from semantic_selector import ml_model
+from semantic_selector import nn_fc_model
 from semantic_selector import datasource
-
 
 
 def main():
@@ -19,7 +18,7 @@ def main():
     args = parser.parse_args()
 
     (training, tests) = datasource.InputTags(args.threashold).fetch_data(args.ratio_test)
-    model = ml_model.LsiModel(training)
+    model = nn_fc_model.NNFullyConnectedModel(training, tests)
     print("failing inferences\n")
     print("estimated, correct")
     positive_hit = 0
@@ -27,7 +26,7 @@ def main():
     unknown_cnt = 0
     for t in tests:
         target_tag = t.html
-        estimated_label = model.inference_html(target_tag)
+        estimated_label = model.inference_html(t)
         correct_label = t.label
         if estimated_label != correct_label:
             print(estimated_label + "," + correct_label)
@@ -41,9 +40,9 @@ def main():
 
     print()
     print("# of test data: " + str(len(tests)))
-    print("# of training_data: " + str(len(model.word_vecs)))
-    print("# of vector elements: " + str(model.num_topics))
-    print("Model Fitting Score,", model.fitting_score)
+    #print("# of training_data: " + str(len(model.word_vecs)))
+    #print("# of vector elements: " + str(model.num_topics))
+    #print("Model Fitting Score,", model.fitting_score)
     print("Accuracy,", ((positive_hit + unknown_hit) / len(tests)))
     print("Recall,", (positive_hit / (len(tests) - unknown_cnt)))
     print("unkown ratio in test data,", (unknown_cnt / len(tests)))
