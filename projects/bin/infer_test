@@ -4,6 +4,7 @@ import os
 import yaml
 import argparse
 from semantic_selector import ml_model
+from semantic_selector import chainer_model
 from semantic_selector import datasource
 
 
@@ -19,7 +20,8 @@ def main():
     args = parser.parse_args()
 
     (training, tests) = datasource.InputTags(args.threashold).fetch_data(args.ratio_test)
-    model = ml_model.LsiModel(training)
+    model = chainer_model.ChainerModel(training, tests)
+
     print("failing inferences\n")
     print("estimated, correct")
     positive_hit = 0
@@ -41,9 +43,8 @@ def main():
 
     print()
     print("# of test data: " + str(len(tests)))
-    print("# of training_data: " + str(len(model.word_vecs)))
-    print("# of vector elements: " + str(model.num_topics))
-    print("Model Fitting Score,", model.fitting_score)
+    print("# of training_data: " + str(model.n))
+    print("model description: " + model.describe())
     print("Accuracy,", ((positive_hit + unknown_hit) / len(tests)))
     print("Recall,", (positive_hit / (len(tests) - unknown_cnt)))
     print("unkown ratio in test data,", (unknown_cnt / len(tests)))

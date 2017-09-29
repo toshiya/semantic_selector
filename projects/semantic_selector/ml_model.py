@@ -18,6 +18,7 @@ class LsiModel(object):
          self.label_types) = self.__convert_training(training)
 
         dictionary = corpora.Dictionary(self.word_vecs)
+        dictionary.save_as_text("words.txt")
         corpus = [dictionary.doc2bow(word_vec) for word_vec in self.word_vecs]
         lsi = models.LsiModel(corpus,
                               id2word=dictionary,
