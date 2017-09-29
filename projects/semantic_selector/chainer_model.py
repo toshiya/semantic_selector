@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # References:
-# * https://github.com/chainer/chainer/blob/master/examples/mnist/train_mnist.py
-# * https://github.com/ichiroex/chainer-ffnn/blob/master/train.py
+# https://github.com/chainer/chainer/blob/master/examples/mnist/train_mnist.py
+# https://github.com/ichiroex/chainer-ffnn/blob/master/train.py
 
 import numpy as np
 from gensim import corpora, matutils, models, similarities
@@ -23,21 +23,26 @@ from chainer.training import extensions
 from chainer.datasets import tuple_dataset
 
 BATCH_SIZE = int(os.getenv('BATCH_SIZE', '200'))
-N_EPOCH    = int(os.getenv('N_EPOCH',    '150'))
-N_UNITS_1  = int(os.getenv('N_UNITS_1',  '300'))
-N_UNITS_2  = int(os.getenv('N_UNITS_2',  '100'))
-DROPOUT    = int(os.getenv('DROPOUT',    '0'))
-RELU       = int(os.getenv('RELU',       '0'))
+N_EPOCH = int(os.getenv('N_EPOCH', '200'))
+N_UNITS_1 = int(os.getenv('N_UNITS_1', '200'))
+N_UNITS_2 = int(os.getenv('N_UNITS_2', '50'))
+DROPOUT = int(os.getenv('DROPOUT', '1'))
+RELU = int(os.getenv('RELU', '1'))
+
 
 class Model(Chain):
-    def __init__(self, in_units, out_units, n_units_1 = N_UNITS_1, n_units_2 = N_UNITS_2):
+    def __init__(self,
+                 in_units,
+                 out_units,
+                 n_units_1=N_UNITS_1,
+                 n_units_2=N_UNITS_2):
         super(Model, self).__init__(
             l1=L.Linear(in_units, n_units_1),
             l2=L.Linear(n_units_1, n_units_2),
             l3=L.Linear(n_units_2, out_units),
             )
         self.dropout = DROPOUT
-        self.relu    = RELU
+        self.relu = RELU
 
     def __call__(self, x):
         h1 = self.l1(x)
@@ -62,6 +67,7 @@ class Model(Chain):
 
         return self.l3(h2)
 
+
 class ChainerModel(object):
 
     def __init__(self, training, tests):
@@ -78,7 +84,8 @@ class ChainerModel(object):
             self.__save_model()
 
     def describe(self):
-        return "Layer 1: %d, Layer 2: %d, Generations: %d, Batch size: %d" % (N_UNITS_1, N_UNITS_2, N_EPOCH, BATCH_SIZE)
+        info_str = "Layer 1: %d, Layer 2: %d, Generations: %d, Batch size: %d"
+        return info_str % (N_UNITS_1, N_UNITS_2, N_EPOCH, BATCH_SIZE)
 
     def __prepare_data(self):
         dictionary = corpora.Dictionary(self.word_vecs)
@@ -93,7 +100,8 @@ class ChainerModel(object):
             vec = matutils.corpus2dense([bow], self.in_units).T[0]
             train_data.append(np.array(vec).astype(np.float32))
         self.training = tuple_dataset.TupleDataset(train_data,
-                                                   np.array(self.label_ids).astype(np.int32))
+                                                   np.array(self.label_ids)
+                                                     .astype(np.int32))
 
         self.n = len(self.training)
         self.dictionary = dictionary
@@ -101,7 +109,7 @@ class ChainerModel(object):
         if len(self.tests) > 0:
             self.tests = self.__convert_tests(self.tests)
 
-    def __prepare_model(self, n_units_1 = N_UNITS_1, n_units_2 = N_UNITS_2):
+    def __prepare_model(self, n_units_1=N_UNITS_1, n_units_2=N_UNITS_2):
         self.model = Model(self.in_units, self.out_units, n_units_1, n_units_2)
         self.classifier = L.Classifier(self.model)
 
@@ -110,14 +118,16 @@ class ChainerModel(object):
         optimizer = optimizers.Adam()
         optimizer.setup(model)
 
-        train_iter = chainer.iterators.SerialIterator(self.training, BATCH_SIZE)
-        test_iter =  chainer.iterators.SerialIterator(self.tests, BATCH_SIZE,
-                                                      repeat=False, shuffle=False)
+        train_it = chainer.iterators.SerialIterator(self.training, BATCH_SIZE)
+        test_it = chainer.iterators.SerialIterator(self.tests,
+                                                   BATCH_SIZE,
+                                                   repeat=False,
+                                                   shuffle=False)
 
-        updater = training.StandardUpdater(train_iter, optimizer)
+        updater = training.StandardUpdater(train_it, optimizer)
         trainer = training.Trainer(updater, (N_EPOCH, 'epoch'), out='result')
 
-        trainer.extend(extensions.Evaluator(test_iter, model))
+        trainer.extend(extensions.Evaluator(test_it, model))
         trainer.extend(extensions.dump_graph('main/loss'))
         trainer.extend(extensions.LogReport())
 
@@ -150,7 +160,6 @@ class ChainerModel(object):
             name += "sigmoid_"
         return name
 
-
     def __save_model(self):
         print('save the model')
         f = open('model.meta', 'wb')
@@ -171,11 +180,19 @@ class ChainerModel(object):
     def __load_model(self, filename):
         print('load the model')
         f = open(filename + '.meta', 'rb')
-        self.dictionary, self.n, self.in_units, self.out_units, self.label_types, n_units_1, n_units_2, dropout, relu = pickle.load(f)
+        (self.dictionary,
+         self.n,
+         self.in_units,
+         self.out_units,
+         self.label_types,
+         n_units_1,
+         n_units_2,
+         dropout,
+         relu) = pickle.load(f)
         f.close
         self.__prepare_model(n_units_1, n_units_2)
         self.classifier.predictor.dropout = dropout
-        self.classifier.predictor.relu    = relu
+        self.classifier.predictor.relu = relu
         chainer.serializers.load_hdf5(filename + '.hdf5', self.classifier)
 
     def __convert_training(self, training):
@@ -201,15 +218,15 @@ class ChainerModel(object):
             bow = self.dictionary.doc2bow(tokens)
             vec = matutils.corpus2dense([bow], self.in_units).T[0]
             if r.label not in self.label_types:
-                continue # skip labels undefined in training data
+                continue  # skip labels undefined in training data
             label_id = self.label_types.index(r.label)
             data.append(np.array(vec).astype(np.float32))
             labels.append(np.int32(label_id))
         return tuple_dataset.TupleDataset(data, labels)
 
-    def inference_html(self, target_tag):
+    def inference_html(self, tag):
         input_tag_tokenizer = tokenizer.InputTagTokenizer()
-        tokens = input_tag_tokenizer.get_attrs_value(target_tag)
+        tokens = input_tag_tokenizer.get_attrs_value(tag.html)
         bow = self.dictionary.doc2bow(tokens)
         vec = matutils.corpus2dense([bow], self.in_units).T[0]
         x = chainer.Variable(np.asarray(np.array([vec]).astype(np.float32)))

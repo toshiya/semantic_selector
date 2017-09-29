@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from gensim import corpora, models, similarities
+from gensim import corpora, models
 from sklearn.linear_model import LogisticRegression
 from semantic_selector import tokenizer
 from semantic_selector import datasource
@@ -40,9 +40,9 @@ class LsiModel(object):
         self.lsi = lsi
         self.lr = lr
 
-    def inference_html(self, target_tag):
+    def inference_html(self, tag):
         input_tag_tokenizer = tokenizer.InputTagTokenizer()
-        tokens = input_tag_tokenizer.get_attrs_value(target_tag)
+        tokens = input_tag_tokenizer.get_attrs_value(tag.html)
         vec_bow = self.dictionary.doc2bow(tokens)
         vec_lsi = self.__sparse_to_dense(self.lsi[vec_bow])
         if len(vec_lsi) == 0:

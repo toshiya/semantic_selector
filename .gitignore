@@ -5,4 +5,5 @@ tool/.bundle/
 tool/Gemfile.lock
 tool/vendor/
 venv/
+result/
 .token
