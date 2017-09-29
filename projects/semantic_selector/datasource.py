@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 import mysql.connector
-import random
 import time
+import numpy as np
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, Integer, String
@@ -26,7 +26,6 @@ class Inputs(declarative_base()):
 class InputTags(object):
     class __InputTags:
         def __init__(self, exclude_threshold):
-            random.seed(int(time.time()))
             self.engine = create_engine(
                     'mysql+mysqlconnector://root:@localhost/register_form',
                     echo=False)
@@ -34,9 +33,8 @@ class InputTags(object):
             self.session = self.Session()
             self.exclude_threshold = exclude_threshold
 
-        def fetch_data(self, ratio_test_data):
-            training_data = []
-            test_data = []
+        def fetch_data(self, ratio_test_data, seed):
+            all_data = []
             sql = '''
             select * from inputs
                      where label IN
@@ -47,11 +45,15 @@ class InputTags(object):
 '''
             vals = {'threshold': self.exclude_threshold}
             for r in self.session.execute(sql, vals):
-                rand = random.randint(0, 100)
-                if (rand < 100 * ratio_test_data):
-                    test_data.append(r)
-                else:
-                    training_data.append(r)
+                all_data.append(r)
+            n = len(all_data)
+            if os.getenv('N_TEST_DATA'):
+                perm = [int(x) for x in os.getenv('N_TEST_DATA').split(',')]
+            else:
+                np.random.seed(seed)
+                perm = np.random.permutation(n)[0:int(n * ratio_test_data)]
+            test_data = [all_data[i] for i in perm]
+            training_data = [all_data[i] for i in range(0, n) if i not in perm]
             return (training_data, test_data)
 
     instance = None

@@ -27,8 +27,8 @@ class NNFullyConnectedModel:
         self.train()
 
     def train(self):
-        batch_size = 128
-        epochs = 1000
+        batch_size = 200
+        epochs = 400
         self.model.fit(self.x_train, self.y_train,
                        batch_size=batch_size,
                        epochs=epochs,
@@ -47,9 +47,11 @@ class NNFullyConnectedModel:
 
     def __construct(self):
         model = Sequential()
-        model.add(Dense(128,
+        model.add(Dense(400,
                         activation='relu',
                         input_shape=(self.num_terms,)))
+        model.add(Dropout(0.5))
+        model.add(Dense(100, activation='relu'))
         model.add(Dropout(0.5))
         model.add(Dense(self.num_classes, activation='softmax'))
         model.compile(loss=keras.losses.categorical_crossentropy,

@@ -18,6 +18,7 @@ class LsiModel(object):
          self.label_types) = self.__convert_training(training)
 
         dictionary = corpora.Dictionary(self.word_vecs)
+        dictionary.save_as_text("words.txt")
         corpus = [dictionary.doc2bow(word_vec) for word_vec in self.word_vecs]
         lsi = models.LsiModel(corpus,
                               id2word=dictionary,
@@ -39,9 +40,9 @@ class LsiModel(object):
         self.lsi = lsi
         self.lr = lr
 
-    def inference_html(self, target_tag):
+    def inference_html(self, tag):
         input_tag_tokenizer = tokenizer.InputTagTokenizer()
-        tokens = input_tag_tokenizer.get_attrs_value(target_tag)
+        tokens = input_tag_tokenizer.get_attrs_value(tag.html)
         vec_bow = self.dictionary.doc2bow(tokens)
         vec_lsi = self.__sparse_to_dense(self.lsi[vec_bow])
         if len(vec_lsi) == 0:
