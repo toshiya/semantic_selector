@@ -20,7 +20,7 @@ import chainer.links as L
 from chainer import Chain, Variable, optimizers, serializers
 from chainer import training
 from chainer.training import extensions
-from chainer.datasets import tuple_dataset as td
+from chainer.datasets import tuple_dataset
 
 BATCH_SIZE = int(os.getenv('BATCH_SIZE', '200'))
 N_EPOCH = int(os.getenv('N_EPOCH', '200'))
@@ -99,9 +99,9 @@ class ChainerModel(object):
             bow = dictionary.doc2bow(word_vec)
             vec = matutils.corpus2dense([bow], self.in_units).T[0]
             train_data.append(np.array(vec).astype(np.float32))
-        self.training = td.TupleDataset(train_data,
-                                        np.array(self.label_ids)
-                                          .astype(np.int32))
+        self.training = tuple_dataset.TupleDataset(train_data,
+                                                   np.array(self.label_ids)
+                                                     .astype(np.int32))
 
         self.n = len(self.training)
         self.dictionary = dictionary
@@ -222,7 +222,7 @@ class ChainerModel(object):
             label_id = self.label_types.index(r.label)
             data.append(np.array(vec).astype(np.float32))
             labels.append(np.int32(label_id))
-        return td.TupleDataset(data, labels)
+        return tuple_dataset.TupleDataset(data, labels)
 
     def inference_html(self, tag):
         input_tag_tokenizer = tokenizer.InputTagTokenizer()

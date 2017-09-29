@@ -17,7 +17,7 @@ def main():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--threashold', type=int, nargs='?', help='a threashold of the number of labels', default=10)
     parser.add_argument('--ratio_test', type=float, nargs='?', help='a ratio of test sets', default=0.05)
-    parser.add_argument('--model_name', nargs='?', help='categorize model', default="nn_fc")
+    parser.add_argument('--model_name', nargs='?', help='model to use', default="nn_fc")
     parser.add_argument('--seed', type=int, nargs='?', help='seed of np.random', default=100)
     args = parser.parse_args()
 
@@ -42,7 +42,6 @@ def main():
     unknown_hit = 0
     unknown_cnt = 0
     for t in tests:
-        target_tag = t.html
         estimated_label = model.inference_html(t)
         correct_label = t.label
         if estimated_label != correct_label:
