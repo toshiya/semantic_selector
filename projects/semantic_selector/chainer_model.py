@@ -14,7 +14,7 @@ import os
 import shutil
 import six
 import pickle
-import chainer.iterator as Iter
+import chainer
 import chainer.functions as F
 import chainer.links as L
 from chainer import Chain, Variable, optimizers, serializers
@@ -118,16 +118,16 @@ class ChainerModel(object):
         optimizer = optimizers.Adam()
         optimizer.setup(model)
 
-        train_iter = Iter.SerialIterator(self.training, BATCH_SIZE)
-        test_iter = Iter.SerialIterator(self.tests,
-                                        BATCH_SIZE,
-                                        repeat=False,
-                                        shuffle=False)
+        train_it = chainer.iterators.SerialIterator(self.training, BATCH_SIZE)
+        test_it = chainer.iterators.SerialIterator(self.tests,
+                                                   BATCH_SIZE,
+                                                   repeat=False,
+                                                   shuffle=False)
 
-        updater = training.StandardUpdater(train_iter, optimizer)
+        updater = training.StandardUpdater(train_it, optimizer)
         trainer = training.Trainer(updater, (N_EPOCH, 'epoch'), out='result')
 
-        trainer.extend(extensions.Evaluator(test_iter, model))
+        trainer.extend(extensions.Evaluator(test_it, model))
         trainer.extend(extensions.dump_graph('main/loss'))
         trainer.extend(extensions.LogReport())
 
@@ -180,9 +180,15 @@ class ChainerModel(object):
     def __load_model(self, filename):
         print('load the model')
         f = open(filename + '.meta', 'rb')
-        (self.dictionary, self.n, self.in_units,
-         self.out_units, self.label_types, n_units_1, n_units_2,
-         dropout, relu) = pickle.load(f)
+        (self.dictionary,
+         self.n,
+         self.in_units,
+         self.out_units,
+         self.label_types,
+         n_units_1,
+         n_units_2,
+         dropout,
+         relu) = pickle.load(f)
         f.close
         self.__prepare_model(n_units_1, n_units_2)
         self.classifier.predictor.dropout = dropout
