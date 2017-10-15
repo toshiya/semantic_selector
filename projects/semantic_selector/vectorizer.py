@@ -1,3 +1,4 @@
+import pickle
 import numpy as np
 from gensim import corpora, models, matutils
 from semantic_selector import tokenizer
@@ -10,6 +11,8 @@ class Vectorizer:
         # set input dimension of NN
         if dictionary is None:
             self.dictionary = corpora.Dictionary(self.word_vecs)
+            with open("inputs.dict","wb") as f:
+                self.dictionary.save(f)
         else:
             self.dictionary = dictionary
 
@@ -17,6 +20,8 @@ class Vectorizer:
             self.label_types = list(set(labels))
         else:
             self.label_types = label_types
+            with open("labels.pickle","wb") as f:
+                pickle.dump(self.label_types, f)
 
         self.num_terms = len(self.dictionary.keys())
         print("num_terms (input dim):", self.num_terms)

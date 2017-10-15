@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import keras
 from gensim import corpora, models, matutils
@@ -30,6 +31,7 @@ class NNFullyConnectedModel:
                                                  self.num_classes)
 
         self.model = self.__construct()
+        self.model.save("nn_fc_model.h5")
         self.train()
 
     def train(self):

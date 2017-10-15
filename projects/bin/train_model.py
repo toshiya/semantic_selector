@@ -24,7 +24,7 @@ def main():
     (training, tests) = datasource.InputTags(args.threashold).fetch_data(args.ratio_test, args.seed)
 
     model_name = args.model_name
-    print("loading model: %s" % (model_name))
+    print("model type: %s" % (model_name))
     if model_name == "nn_fc":
         model = nn_fc_model.NNFullyConnectedModel(training, tests)
     elif model_name == "chainer":
@@ -39,27 +39,19 @@ def main():
     print("failing inferences\n")
     print("estimated, correct")
     positive_hit = 0
-    unknown_hit = 0
-    unknown_cnt = 0
     for t in tests:
         estimated_label = model.inference_html(t)
         correct_label = t.label
         if estimated_label != correct_label:
             print(estimated_label + "," + correct_label)
-        if correct_label == 'unknown':
-            unknown_cnt += 1
         if estimated_label == correct_label:
-            if correct_label == 'unknown':
-                unknown_hit += 1
-            else:
-                positive_hit += 1
+            positive_hit += 1
 
     print()
     print("# of test data: " + str(len(tests)))
     print("# of training_data: " + str(len(training)))
-    print("Accuracy,", ((positive_hit + unknown_hit) / len(tests)))
-    print("Recall,", (positive_hit / (len(tests) - unknown_cnt)))
-    print("unkown ratio in test data,", (unknown_cnt / len(tests)))
+    print("Accuracy,", positive_hit / len(tests))
+    print("Recall,", (positive_hit / len(tests)))
 
 
 if __name__ == '__main__':

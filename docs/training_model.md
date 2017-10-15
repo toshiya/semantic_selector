@@ -43,7 +43,7 @@ pip3 install -r projects/requirements.txt
 After setting up your python environment and load the training set into the local MySQL server, you can run the training scripts to generate models.
 
 ```bash
-$ PYTHONPATH=projects  ./projects/bin/infer_test
+$ PYTHONPATH=projects  ./projects/bin/train_model.py
 
 ... (some output lines)
 
@@ -51,5 +51,6 @@ $ PYTHONPATH=projects  ./projects/bin/infer_test
 # of training_data: 3099
 Accuracy, 0.8282208588957055
 Recall, 0.8282208588957055
-unkown ratio in test data, 0.0
 ```
+
+If the script successfully finished, you can find the files `nn_fc_model.h5`, `inputs.dict`, and `labels.pickle` in the root directory. These files can be used by [API Server](docs/api_server.md).
