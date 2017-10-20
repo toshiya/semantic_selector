@@ -93,11 +93,11 @@ If the script successfully finished,
 you can find model (labels, and dictionary) files under `models` dirctory.
 
 ```bash
-(venv) [toshiya.komoda@o-09033-mac.local:git/github.com/semantic_selector]# ls -lrt models
+$ ls -lrt models
 total 29848
--rw-r--r--  1 toshiya.komoda  DENA\Domain Users  15200796 10 20 13:14 nn_fc_model.h5
--rw-r--r--  1 toshiya.komoda  DENA\Domain Users       975 10 20 13:14 labels.pickle
--rw-r--r--  1 toshiya.komoda  DENA\Domain Users     73531 10 20 13:14 inputs.dict
+-rw-r--r--  1 toshiya.komoda toshiya.komoda   15200796 10 20 13:14 nn_fc_model.h5
+-rw-r--r--  1 toshiya.komoda toshiya.komoda        975 10 20 13:14 labels.pickle
+-rw-r--r--  1 toshiya.komoda toshiya.komoda      73531 10 20 13:14 inputs.dict
 ```
 
  These files are used by [API Server](docs/api_server.md).
