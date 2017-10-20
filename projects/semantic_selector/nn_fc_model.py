@@ -22,9 +22,9 @@ class NNFullyConnectedModel:
 
     def load(self):
         self.model = load_model("models/nn_fc_model.h5")
-        with open("models/labels.pickle", "r") as f:
+        with open("models/labels.pickle", "rb") as f:
             self.label_types = pickle.load(f)
-        with open("models/inputs.dict", "r") as f:
+        with open("models/inputs.dict", "rb") as f:
             self.dictionary = pickle.load(f)
 
     def save(self):
@@ -63,8 +63,10 @@ class NNFullyConnectedModel:
         set self.dictionary, self.lable_types and
         generate train_x(y) and test_x(y)
         """
-        (word_vecs_train, labels_train) = self.__convert_to_word_vecs(training)
-        (word_vecs_test, labels_test) = self.__convert_to_word_vecs(tests)
+        (word_vecs_train,
+         labels_train) = self.__convert_to_word_vecs(training, with_label=True)
+        (word_vecs_test,
+         labels_test) = self.__convert_to_word_vecs(tests, with_label=True)
 
         # use dictionary and label_types of training set
         self.dictionary = corpora.Dictionary(word_vecs_train)
@@ -86,14 +88,15 @@ class NNFullyConnectedModel:
             y = keras.utils.to_categorical(y, len(self.label_types))
         return (x, y)
 
-    def __convert_to_word_vecs(self, records):
+    def __convert_to_word_vecs(self, records, with_label=False):
         input_tag_tokenizer = tokenizer.InputTagTokenizer()
         word_vecs = []
         labels = []
         test_labels = []
         for r in records:
             word_vecs.append(input_tag_tokenizer.get_attrs_value(r.html))
-            labels.append(r.label)
+            if with_label:
+                labels.append(r.label)
         return (word_vecs, labels)
 
     def __construct_neural_network(self):
