@@ -1,5 +1,6 @@
+from attrdict import AttrDict
 from flask import Flask, request, jsonify, make_response, g
-from semantic_selector import ml_model
+from semantic_selector import nn_fc_model
 from semantic_selector import datasource
 
 import os
@@ -12,9 +13,8 @@ model = None
 def startup():
     global model
     print("initializing model...")
-    (training, tests) = datasource.InputTags().fetch_data(0.00)
-    model = ml_model.LsiModel(training)
-
+    model = nn_fc_model.NNFullyConnectedModel()
+    model.load()
 
 @app.route("/api/inference", methods=['POST'])
 def inference():
@@ -26,7 +26,7 @@ def inference():
         err_message = 'request body json must contain "html" attributes'
         return make_response(err_message, 400)
 
-    target_tag = request.json["html"]
-    estimated_label = model.inference_html(target_tag)
-    res = {"label": estimated_label}
+    target_tag = AttrDict({'html': request.json["html"]})
+    estimated_topic = model.inference_html(target_tag)
+    res = {"topic": estimated_topic}
     return jsonify(res)

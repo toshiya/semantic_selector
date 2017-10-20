@@ -15,7 +15,7 @@ class ApiClient
     result = "unknown"
     if response.success?
       body = JSON.parse(response.body, {:symbolize_names => true})
-      result = body[:label]
+      result = body[:topic]
     end
     return result
   end

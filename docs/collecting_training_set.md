@@ -1,7 +1,7 @@
-# Collect new training data
 
-Provide some utitlity functions to label input forms.
-require Ruby2.4+
+Under Construction.
+
+# Collecting Your Own Training Data
 
 ```bash
 brew install chromedriver
