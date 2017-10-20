@@ -27,6 +27,6 @@ def inference():
         return make_response(err_message, 400)
 
     target_tag = AttrDict({'html': request.json["html"]})
-    estimated_label = model.inference_html(target_tag)
-    res = {"label": estimated_label}
+    estimated_topic = model.inference_html(target_tag)
+    res = {"topic": estimated_topic}
     return jsonify(res)

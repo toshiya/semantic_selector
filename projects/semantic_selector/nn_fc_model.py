@@ -18,12 +18,12 @@ class NNFullyConnectedModel:
         self.batch_size = 200
         self.model = None
         self.dictionary = None
-        self.label_types = None
+        self.topic_types = None
 
     def load(self):
         self.model = load_model("models/nn_fc_model.h5")
-        with open("models/labels.pickle", "rb") as f:
-            self.label_types = pickle.load(f)
+        with open("models/topics.pickle", "rb") as f:
+            self.topic_types = pickle.load(f)
         with open("models/inputs.dict", "rb") as f:
             self.dictionary = pickle.load(f)
 
@@ -31,19 +31,19 @@ class NNFullyConnectedModel:
         if not os.path.exists("models"):
             os.makedirs("models")
         self.model.save("models/nn_fc_model.h5")
-        with open("models/labels.pickle", "wb") as f:
-            pickle.dump(self.label_types, f)
+        with open("models/topics.pickle", "wb") as f:
+            pickle.dump(self.topic_types, f)
         with open("models/inputs.dict", "wb") as f:
             self.dictionary.save(f)
 
     def inference_html(self, record):
         (word_vecs, _) = self.__convert_to_word_vecs([record])
         (numpy_vecs, _) = self.__adjust_format(word_vecs)
-        label_id = self.model.predict(numpy_vecs)[0].argmax()
-        return self.label_name_from_id(label_id)
+        topic_id = self.model.predict(numpy_vecs)[0].argmax()
+        return self.topic_name_from_id(topic_id)
 
-    def label_name_from_id(self, label_id):
-        return self.label_types[label_id]
+    def topic_name_from_id(self, topic_id):
+        return self.topic_types[topic_id]
 
     def train(self, training, test, epochs=400):
         self.__prepare_for_training(training, test)
@@ -64,40 +64,40 @@ class NNFullyConnectedModel:
         generate train_x(y) and test_x(y)
         """
         (word_vecs_train,
-         labels_train) = self.__convert_to_word_vecs(training, with_label=True)
+         topics_train) = self.__convert_to_word_vecs(training, with_topic=True)
         (word_vecs_test,
-         labels_test) = self.__convert_to_word_vecs(tests, with_label=True)
+         topics_test) = self.__convert_to_word_vecs(tests, with_topic=True)
 
-        # use dictionary and label_types of training set
+        # use dictionary and topic_types of training set
         self.dictionary = corpora.Dictionary(word_vecs_train)
-        self.label_types = list(set(labels_train))
+        self.topic_types = list(set(topics_train))
 
         (self.x_train,
-         self.y_train) = self.__adjust_format(word_vecs_train, labels_train)
+         self.y_train) = self.__adjust_format(word_vecs_train, topics_train)
         (self.x_test,
-         self.y_test) = self.__adjust_format(word_vecs_test, labels_test)
+         self.y_test) = self.__adjust_format(word_vecs_test, topics_test)
 
-    def __adjust_format(self, word_vecs, labels=None):
+    def __adjust_format(self, word_vecs, topics=None):
         bows = [self.dictionary.doc2bow(v) for v in word_vecs]
         x = matutils.corpus2dense(bows, len(self.dictionary.keys())).T
 
         y = None
-        if labels is not None:
-            y = [self.label_types.index(l) for l in labels]
+        if topics is not None:
+            y = [self.topic_types.index(l) for l in topics]
             y = np.asarray(y, dtype=np.float32)
-            y = keras.utils.to_categorical(y, len(self.label_types))
+            y = keras.utils.to_categorical(y, len(self.topic_types))
         return (x, y)
 
-    def __convert_to_word_vecs(self, records, with_label=False):
+    def __convert_to_word_vecs(self, records, with_topic=False):
         input_tag_tokenizer = tokenizer.InputTagTokenizer()
         word_vecs = []
-        labels = []
-        test_labels = []
+        topics = []
+        test_topics = []
         for r in records:
             word_vecs.append(input_tag_tokenizer.get_attrs_value(r.html))
-            if with_label:
-                labels.append(r.label)
-        return (word_vecs, labels)
+            if with_topic:
+                topics.append(r.topic)
+        return (word_vecs, topics)
 
     def __construct_neural_network(self):
         model = Sequential()
@@ -107,7 +107,7 @@ class NNFullyConnectedModel:
         model.add(Dropout(0.5))
         model.add(Dense(100, activation='relu'))
         model.add(Dropout(0.5))
-        model.add(Dense(len(self.label_types), activation='softmax'))
+        model.add(Dense(len(self.topic_types), activation='softmax'))
         model.compile(loss=keras.losses.categorical_crossentropy,
                       optimizer=keras.optimizers.Adadelta(),
                       metrics=['accuracy'])

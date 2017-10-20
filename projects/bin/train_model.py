@@ -13,7 +13,7 @@ def main():
     '''
 
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('--threashold', type=int, nargs='?', help='a threashold of the number of labels', default=10)
+    parser.add_argument('--threashold', type=int, nargs='?', help='a threashold of the number of topics', default=10)
     parser.add_argument('--ratio_test', type=float, nargs='?', help='a ratio of test sets', default=0.2)
     parser.add_argument('--model_name', nargs='?', help='model to use', default="nn_fc")
     parser.add_argument('--seed', type=int, nargs='?', help='seed of np.random', default=100)
@@ -36,10 +36,10 @@ def main():
         print("failing inferences\n")
         print("estimated, correct")
         for t in tests:
-            estimated_label = model.inference_html(t)
-            correct_label = t.label
-            if estimated_label != correct_label:
-                print(estimated_label + "," + correct_label)
+            estimated_topic = model.inference_html(t)
+            correct_topic = t.topic
+            if estimated_topic != correct_topic:
+                print(estimated_topic + "," + correct_topic)
 
     print()
     print("# of test data: " + str(len(tests)))

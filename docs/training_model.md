@@ -58,13 +58,7 @@ Each record in the `inputs` table is 1 training sample with following columns.
 |html| HTML snippet of the input fields|
 |parent_html| The parent HTML snippet of the input fields|
 |label_html| The label HTML snippet of the input fields, if it exists in the page|
-|label| The topic of the input fields (manually verified)|
-
-# we recommend you to use venv
-python -m venv venv
-source venv/bin/activate
-
-```
+|topic| The topic of the input fields (manually verified)|
 
 # Run the training script
 

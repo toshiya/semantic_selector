@@ -16,11 +16,11 @@ class Inputs(declarative_base()):
     url = Column(String)
     html = Column(String)
     parent_html = Column(String)
-    label = Column(String)
+    topic = Column(String)
 
     def __repr__(self):
-        return "<Input(url='%s', html='%s', label='%s')" % (
-                self.url, self.html, self.label)
+        return "<Input(url='%s', html='%s', topic='%s')" % (
+                self.url, self.html, self.topic)
 
 
 class InputTags(object):
@@ -37,9 +37,9 @@ class InputTags(object):
             all_data = []
             sql = '''
             select * from inputs
-                     where label IN
-                     (select label from inputs
-                                   group by label
+                     where topic IN
+                     (select topic from inputs
+                                   group by topic
                                    having count(1) > :threshold)
                      order by id
 '''
