@@ -11,7 +11,7 @@ LIST = [
   "load_page",
   "load_highliter",
   "collect",
-  # common labels
+  # common topics
   "mail_delivery",
   "pc_email",
   "gender",
@@ -92,40 +92,40 @@ lambda {
 
         name = tag.attribute('name')
         html = tag.attribute('outerHTML')
-        infered_label = $api_client.inference_html(html)
+        infered_topic = $api_client.inference_html(html)
         Highlight.highlight_by_name(name)
 
         put_n "#{index}/#{tags.length}"
         put_n "HTML"
         put_n html
-        put_w "LABEL: #{infered_label}.".red
-        put_q "OK ? then press [enter]. or Input correct label and [enter]"
+        put_w "topic: #{infered_topic}.".red
+        put_q "OK ? then press [enter]. or Input correct topic and [enter]"
 
-        existing_labels = DBUtil.labels() || []
+        existing_topics = DBUtil.topics() || []
         prompt = Readline.readline('> ', true).strip
         while prompt.length > 0
           case prompt
           when "exit"
             return
           when "s","skip"
-            infered_label = "skip"
+            infered_topic = "skip"
             break
-          when "l", "labels"
+          when "t", "topics"
             put_n "...listing all lables"
-            existing_labels.each do |label|
-              put_n label
+            existing_topics.each do |topic|
+              put_n topic
             end
-            put_q "input new label"
+            put_q "input new topic"
             prompt = Readline.readline('> ', true).strip
             next
           else
-            infered_label = prompt
-            unless existing_labels.include?(infered_label)
-              put_w "[WARN] This label is not in the current DB."
+            infered_topic = prompt
+            unless existing_topics.include?(infered_topic)
+              put_w "[WARN] This topic is not in the current DB."
               put_q "OK? if not, press [n]"
               answer = Readline.readline('> ', true).strip
               unless ["", "y", "yes"].include?(answer)
-                put_q "input new label"
+                put_q "input new topic"
                 prompt = Readline.readline('> ', true).strip
                 next
               end
@@ -134,21 +134,21 @@ lambda {
           end
         end
 
-        if infered_label == "skip"
+        if infered_topic == "skip"
           Highlight.erase_by_name(name)
           put_n "...skiped"
           put_n ""
           next
         end
 
-        put_n "new_label: #{infered_label}".blue
+        put_n "new_topic: #{infered_topic}".blue
         Highlight.erase_by_name(name)
-        DBUtil.save($driver, tag, infered_label)
+        DBUtil.save($driver, tag, infered_topic)
         put_n "...saved"
         put_n ""
       end
 
-      put_n "...labeling finsihed"
+      put_n "...finsihed"
       puts
     end
 

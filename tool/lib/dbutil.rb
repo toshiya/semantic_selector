@@ -15,7 +15,7 @@ module DBUtil
     )
   end
 
-  def save(driver, tag, label)
+  def save(driver, tag, topic)
     title = driver.title
     url = driver.current_url
     html = tag.attribute('outerHTML')
@@ -35,12 +35,12 @@ module DBUtil
       html: html,
       parent_html: parent_html,
       label_html: label_html,
-      label: label,
+      topic: topic,
     )
   end
 
-  def labels()
-    Input.select('label').group('label').map(&:label)
+  def topics()
+    Input.select('topic').group('topic').map(&:topic)
   end
 
   def urls()
@@ -51,5 +51,5 @@ module DBUtil
     urls.map{ |a| a.split('?')[0] }.include?(current_url.split('?')[0])
   end
 
-  module_function :db_setup, :save, :labels, :urls, :visited?
+  module_function :db_setup, :save, :topics, :urls, :visited?
 end

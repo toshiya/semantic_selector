@@ -60,20 +60,33 @@ Each record in the `inputs` table is 1 training sample with following columns.
 |label_html| The label HTML snippet of the input fields, if it exists in the page|
 |topic| The topic of the input fields (manually verified)|
 
-# Run the training script
+## Run the training script
 
 After prepareing the training data in local MySQL server,
 run the training script to generate models.
 
 ```bash
-$ PYTHONPATH=projects  ./projects/bin/train_model.py
+$ PYTHONPATH=projects  ./projects/bin/train_model.py --epochs 400                                                                       Using TensorFlow backend.
+model type: nn_fc
+Train on 2610 samples, validate on 652 samples
+Epoch 1/400
+2017-10-20 13:52:44.301857: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.2 instructions, but these are available on your machine and could speed up CPU computations.
+2017-10-20 13:52:44.301876: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
+2017-10-20 13:52:44.301880: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX2 instructions, but these are available on your machine and could speed up CPU computations.
+2017-10-20 13:52:44.301883: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use FMA instructions, but these are available on your machine and could speed up CPU computations.
+2610/2610 [==============================] - 0s - loss: 3.8752 - acc: 0.0398 - val_loss: 3.7276 - val_acc: 0.1902
+Epoch 2/400
+2610/2610 [==============================] - 0s - loss: 3.7344 - acc: 0.1379 - val_loss: 3.5656 - val_acc: 0.3328
+Epoch 3/400
+2610/2610 [==============================] - 0s - loss: 3.5887 - acc: 0.2115 - val_loss: 3.4212 - val_acc: 0.3666
 
 ... (some output lines)
 
-# of test data: 163
-# of training_data: 3099
-Accuracy, 0.8282208588957055
-Recall, 0.8282208588957055
+Test loss: 0.78047495605
+Test accuracy 0.835889570918
+
+# of test data: 652
+# of training_data: 2610
 ```
 
 If the script successfully finished,
@@ -87,4 +100,4 @@ total 29848
 -rw-r--r--  1 toshiya.komoda  DENA\Domain Users     73531 10 20 13:14 inputs.dict
 ```
 
- These model files are used by [API Server](docs/api_server.md).
+ These files are used by [API Server](docs/api_server.md).
