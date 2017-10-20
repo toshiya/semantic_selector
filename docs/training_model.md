@@ -100,4 +100,4 @@ total 29848
 -rw-r--r--  1 toshiya.komoda toshiya.komoda      73531 10 20 13:14 inputs.dict
 ```
 
- These files are used by [API Server](docs/api_server.md).
+ These files are used by [API Server](/docs/api_server.md).
