@@ -83,7 +83,7 @@ lambda {
       start_index ||= 0
       tags = DOMUtil.find_input_tags($driver)
 
-      put_n "total: #{tags.length} foroms found"
+      put_n "total: #{tags.length} input fields found"
 
       tags.each_with_index do |tag, index|
         if start_index > index
