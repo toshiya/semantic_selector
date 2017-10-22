@@ -6,18 +6,15 @@ topic labels for them.
 We pre-include training data which contains
 Japenese User Registration Page Information.
 If you want to use pre-include data,
-then skip this step and go to
+skip this step and go to
 [Train Models](
 /docs/training_model.md
 ).
 
 # Collecting Train Data
 
-If you want to make your original training data,
-follow instructions below.
-
 Usually, it is time consuming tasks to make training
-data for machine learning. To eash the collecting process,
+data for machine learning. To ease the process,
 we provide a helper script.
 
 The helper script can
@@ -47,7 +44,7 @@ gem install bundler
 bundle install --path vendor/bundle
 ```
 
-Start local MySQL Server.
+Start and setup local MySQL Server.
 
 ```bash
 mysql.server start
@@ -62,7 +59,7 @@ mysql -uroot -p register_form -e 'show create table inputs'
 ```
 
 Start [the input topic identification API server](
-/docs/api_server.md).
+/docs/api_server.md) in this repo.
 
 ```bash
 source venv/bin/activate
