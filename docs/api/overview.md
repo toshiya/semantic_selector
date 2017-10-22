@@ -1,9 +1,9 @@
-# Labrador API
+# Input topic identification API
 
 
 <a name="overview"></a>
 ## Overview
-Labradorのinputタグのラベル推定APIのプロトだよ
+API to identify meanings of text form by machine learning.
 
 
 ### Version information
@@ -11,7 +11,7 @@ Labradorのinputタグのラベル推定APIのプロトだよ
 
 
 ### Contact information
-*Contact Email* : toshiya.komoda@dena.com
+*Contact Email* : toshiya.komoda@gmail.com
 
 
 ### URI scheme

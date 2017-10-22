@@ -8,7 +8,8 @@ Currently, the API server does not have any authentication mechanism.
 
 ## Specification
 
-We use swagger 2.0 to define the API spec ([definition](/projects/docs/swagger.json)).
+We use swagger 2.0 to define the API spec
+([swagger definition](/projects/docs/swagger.json)).
 
 The auto-generated API docs is found in docs/api/.
 

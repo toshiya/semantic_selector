@@ -1,11 +1,11 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "Labradorのinputタグのラベル推定APIのプロトだよ",
+    "description": "API to identify meanings of text form by machine learning.",
     "version": "v0.1",
-    "title": "Labrador API",
+    "title": "Input topic identification API",
     "contact": {
-      "email": "toshiya.komoda@dena.com"
+      "email": "toshiya.komoda@gmail.com"
     }
   },
   "host": "localhost:5000",
@@ -23,7 +23,7 @@
       "post": {
         "tags": [],
         "summary": "inference api for input tags",
-        "description": "return an infered label of the given input tag.",
+        "description": "return an infered topic of the given input tag.",
         "operationId": "inference.input_tags",
         "consumes": [
           "application/json"
@@ -43,16 +43,16 @@
         ],
         "responses": {
           "200": {
-            "description": "正常に推定処理が完了しました",
+            "description": "successfull inference",
             "schema": {
               "$ref": "#/definitions/inference"
             }
           },
           "400": {
-            "description": "リクエストデータが不正です"
+            "description": "invalid request data"
           },
           "500": {
-            "description": "API 側の問題による失敗です"
+            "description": "internal server error"
           }
         }
       }
@@ -73,10 +73,10 @@
     "inference": {
       "type": "object",
       "required": [
-        "label"
+        "topic"
       ],
       "properties": {
-        "label": {
+        "topic": {
           "type": "string"
         }
       }

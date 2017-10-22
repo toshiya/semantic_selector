@@ -10,7 +10,7 @@ POST /inference
 
 
 #### Description
-return an infered label of the given input tag.
+return an infered topic of the given input tag.
 
 
 #### Parameters
@@ -24,9 +24,9 @@ return an infered label of the given input tag.
 
 |HTTP Code|Description|Schema|
 |---|---|---|
-|**200**|正常に推定処理が完了しました|[inference](#inference)|
-|**400**|リクエストデータが不正です|No Content|
-|**500**|API 側の問題による失敗です|No Content|
+|**200**|successfull inference|[inference](#inference)|
+|**400**|invalid request data|No Content|
+|**500**|internal server error|No Content|
 
 
 #### Consumes

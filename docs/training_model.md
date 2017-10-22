@@ -89,7 +89,7 @@ Test accuracy 0.835889570918
 # of training_data: 2610
 ```
 
-After the script successfully finished,
+If the script successfully finished,
 you can find model (labels, and dictionary) files under `models` dirctory.
 
 ```bash

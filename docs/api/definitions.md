@@ -15,7 +15,7 @@
 
 |Name|Schema|
 |---|---|
-|**label**  <br>*required*|string|
+|**topic**  <br>*required*|string|
 
 
 

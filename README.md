@@ -1,3 +1,5 @@
+**This project is now in experimental stage.**
+
 # What's the purpose of this project?
 
 In general, we would like to investigate the following question.
@@ -50,9 +52,19 @@ That would simplify UI test implementation a lot in general.
 
 # Documentation
 
-* [Getting Started](/docs/getting_started.md)
-* [API Server](/docs/api_server.md)
-* [Collect Your Own Training Data](/docs/collecting_training_set.md)
+Currently, this repo includes,
+
+1. scripts to collect training data ([detail](/docs/collecting_training_set.md))
+2. scripts to train models ([detail](/docs/training_model.md))
+3. API Server to provide inference API([detail](/docs/api_server.md))
+
+At the time, we do not provide any integration in popular test framework
+you have to implement additional logic to integrate
+the input topic identitication API in your test scripts.
+
+We have a plan to integrate the input
+topic identitication API to some
+test framework in future.
 
 # Contact
 
