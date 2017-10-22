@@ -11,7 +11,7 @@ skip this step and go to
 /docs/training_model.md
 ).
 
-# Collecting Train Data
+# Collecting Training Data
 
 Usually, it is time consuming tasks to make training
 data for machine learning. To ease the process,

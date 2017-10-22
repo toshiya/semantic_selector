@@ -1,4 +1,4 @@
-# Train Models
+# Model Training
 
 Here, we describe how to generate models for input topic identification.
 
