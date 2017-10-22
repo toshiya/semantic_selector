@@ -43,7 +43,9 @@ mysql.server start
 
 # create and load prepared training set.
 mysql -uroot -p -e 'create database register_form'
-mysql -uroot -p register_form < data/register_form.sql
+
+# Caution!!! This delete all exisiting data in inputs table !!!
+mysql -uroot -p register_form < data/training_data_jp.sql
 ```
 
 ### Training Data Format
