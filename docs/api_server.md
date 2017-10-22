@@ -20,6 +20,10 @@ The auto-generated API docs is found in docs/api/.
 
 # Launch API Server at local
 
+Before launch API server, you have to [setup your python environment](/docs/training_model.md#setup
+).
+
+
 Execute below commands at the root directory.
 The server will start at `localhost:5000`.
 
