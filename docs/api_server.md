@@ -1,12 +1,36 @@
+# API Server
 
-Under construction.
+We provide a very simple API server implementation in order to
+use the function from test codes written in other language than python
+(e.g. Ruby with RSpec).
 
-# API server
+Currently, the API server does not have any authentication mechanism.
+
+## Specification
+
+We use swagger 2.0 to define the API spec ([definition](/projects/docs/swagger.json)).
+
+The auto-generated API docs is found in docs/api/.
+
+- [overview](/docs/api/overview.md)
+- [paths](/docs/api/paths.md)
+- [definitions](/docs/api/definitions.md)
+- [security](/docs/api/security.md)
+
+# Launch API Server at local
+
+Execute below commands at the root directory.
+The server will start at `localhost:5000`.
 
 ```bash
-cd projects
-PYTHONPATH=. FLASK_APP=./bin/api.py flask run
+source venv/bin/activate
+PYTHONPATH=projects FLASK_APP=./projects/bin/api.py flask run
+```
 
-# call it in another console
-curl -X POST -H "Content-Type: application/json" http://localhost:5000/api/inference -d '{ "html" : "<input type='text' name='mail_addr' placeholder='メールアドレス'>"}'
+# HTTP Request Example
+
+curl
+
+```
+curl -X POST -H "Content-Type: application/json" http://localhost:5000/api/inference -d "{ \"html\" : \"<input type='text' name='mail_addr' placeholder='email address'>\"}"
 ```
