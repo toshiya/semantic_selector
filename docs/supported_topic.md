@@ -1,0 +1,31 @@
+# supported topics
+
+- gender
+- question
+- emailSubscriptionCheck
+- serviceTermCheck
+- email
+- email-body
+- email-domain
+- password
+- birthDate
+- birthDate-year
+- birthDate-month
+- birthDate-day
+- userName
+- userName-family
+- userName-given
+- userName-family-kana
+- userName-given-kana
+- address
+- address-country
+- address-prefecture
+- address-town
+- address-street
+- address-building
+- postalCode
+- postalCode-first
+- postalCode-last
+- nextButton
+- postalCodeSearchButton
+- backButton
