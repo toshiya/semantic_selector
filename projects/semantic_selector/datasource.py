@@ -1,15 +1,31 @@
 # -*- coding: utf-8 -*-
 import os
+import csv
 import mysql.connector
 import time
 import numpy as np
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, Integer, String
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
+from sqlalchemy.ext.hybrid import hybrid_property
 
 
-class Inputs(declarative_base()):
+def read_canonical_topics():
+    canonical_topic_table = {}
+    file_path = os.path.abspath(os.path.dirname(__file__))
+    with open(os.path.join(file_path, '../docs/canonicalTopics.csv')) \
+            as csv_file:
+        reader = csv.reader(csv_file, delimiter=",")
+        for row in reader:
+            if row[0] in canonical_topic_table:
+                print(row[0])
+            canonical_topic_table[row[0]] = row[1]
+    return canonical_topic_table
+
+
+class Input(declarative_base()):
+    canonical_table = read_canonical_topics()
     __tablename__ = 'inputs'
 
     id = Column(Integer, primary_key=True)
@@ -18,8 +34,14 @@ class Inputs(declarative_base()):
     parent_html = Column(String)
     topic = Column(String)
 
-    def __repr__(self):
-        return "<Input(url='%s', html='%s', topic='%s')" % (
+    @hybrid_property
+    def canonical_topic(self):
+        if self.topic in Input.canonical_table:
+            return self.canonical_table[self.topic]
+        else:
+            return 'unknown'
+
+    def __repr__(self): return "<Input(url='%s', html='%s', topic='%s')" % (
                 self.url, self.html, self.topic)
 
 
@@ -35,16 +57,12 @@ class InputTags(object):
 
         def fetch_data(self, ratio_test_data, seed):
             all_data = []
-            sql = '''
-            select * from inputs
-                     where topic IN
-                     (select topic from inputs
-                                   group by topic
-                                   having count(1) > :threshold)
-                     order by id
-'''
-            vals = {'threshold': self.exclude_threshold}
-            for r in self.session.execute(sql, vals):
+            sub = self.session.query(Input.topic) \
+                      .group_by(Input.topic) \
+                      .having(func.count(1) > self.exclude_threshold)
+            query = self.session.query(Input) \
+                        .filter(Input.topic.in_(sub))
+            for r in query.all():
                 all_data.append(r)
             n = len(all_data)
             if os.getenv('N_TEST_DATA'):
