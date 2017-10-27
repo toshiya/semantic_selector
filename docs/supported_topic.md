@@ -13,6 +13,7 @@
 - birthDate-month
 - birthDate-day
 - userName
+- userName-kana
 - userName-family
 - userName-given
 - userName-family-kana
@@ -26,6 +27,12 @@
 - postalCode
 - postalCode-first
 - postalCode-last
+- securityQuestion
+- securityAnswer
+- telephone
+- telephone-first
+- telephone-middle
+- telephone-last
 - nextButton
 - postalCodeSearchButton
 - backButton
