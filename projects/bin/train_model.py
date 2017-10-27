@@ -37,11 +37,24 @@ def main():
         print("estimated, correct")
         for t in tests:
             estimated_topic = model.inference_html(t)
-            correct_topic = t.topic
+            correct_topic = t.canonical_topic
             if estimated_topic != correct_topic:
                 print(estimated_topic + "," + correct_topic)
 
+
     print()
+
+    num_unknown = 0
+    for t in training:
+        if t.canonical_topic == 'unknown':
+            num_unknown += 1
+    print('# of unknown in training: ' + str(num_unknown))
+
+    num_unknown = 0
+    for t in tests:
+        if t.canonical_topic == 'unknown':
+            num_unknown += 1
+    print('# of unknown in test: ' + str(num_unknown))
     print("# of test data: " + str(len(tests)))
     print("# of training_data: " + str(len(training)))
     model.save()

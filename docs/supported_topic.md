@@ -1,0 +1,22 @@
+# supported topics
+
+- gender
+- question
+- emailSubscriptionCheck
+- serviceTermCheck
+- email
+- email-body
+- email-domain
+- password
+- birthDate
+- userName
+- address
+- address-country
+- address-prefecture
+- postalCode
+- securityQuestion
+- securityAnswer
+- telephone
+- nextButton
+- postalCodeSearchButton
+- backButton

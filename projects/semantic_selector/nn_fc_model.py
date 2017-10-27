@@ -96,7 +96,8 @@ class NNFullyConnectedModel:
         for r in records:
             word_vecs.append(input_tag_tokenizer.get_attrs_value(r.html))
             if with_topic:
-                topics.append(r.topic)
+                # Note: use canonical topic instead of raw topic in mysql
+                topics.append(r.canonical_topic)
         return (word_vecs, topics)
 
     def __construct_neural_network(self):
