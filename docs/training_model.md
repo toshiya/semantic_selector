@@ -15,7 +15,7 @@ Install following software to your local machine.
 ```bash
 brew install mysql pyenv mecab mecab-ipadic
 
-# install python3.5+
+# install python3.5.1+
 pyenv install 3.5.2
 pyenv local 3.5.2
 

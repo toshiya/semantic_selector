@@ -1,14 +1,19 @@
 machine:
+  environment:
+    PYTHONPATH: projects
   python:
-    version: 3.5.0
+    version: 3.5.1
   node:
     version: 8.3.0
 
 dependencies:
   pre:
-    - pip3 install pep8
+    - sudo apt-get install mecab libmecab-dev mecab-ipadic mecab-ipadic-utf8
+    - pip install --upgrade pip
+    - pip3 install -r projects/requirements.txt
 
 test:
   override:
     - pep8 projects/semantic_selector/*.py
+    - python -m unittest discover projects "test_*.py" -v
     - npm run danger
