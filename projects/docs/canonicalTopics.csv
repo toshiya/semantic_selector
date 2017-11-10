@@ -40,7 +40,7 @@ user_name_furigana,userName
 postal_delivery,mailSubscriptionCheck
 company_department,unknown
 country,address-country
-nickname,unknown
+nickname,nickname
 payment_type,unknown
 tel_type,unknown
 privacy_policy,serviceTermCheck
