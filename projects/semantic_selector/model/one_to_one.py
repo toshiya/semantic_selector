@@ -1,15 +1,12 @@
 import os
 import pickle
-import numpy as np
-import keras
-from gensim import corpora, models, matutils
-from keras.datasets import mnist
+from keras.losses import categorical_crossentropy
+from keras.optimizers import Adadelta
 from keras.models import Sequential
 from keras.models import load_model
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
-from semantic_selector.tokenizer import InputTagTokenizer
 
 
 class NNFullyConnectedModel:
@@ -45,8 +42,11 @@ class NNFullyConnectedModel:
     def topic_name_from_id(self, topic_id):
         return self.topic_types[topic_id]
 
-    def train(self, training, test, epochs=400):
-        self.__prepare_for_training(training, test)
+    def train(self, adapter, epochs=400):
+        # receive attributes from adapter
+        for attr in adapter.__dict__.keys():
+            setattr(self, attr, adapter.__dict__[attr])
+
         self.model = self.__construct_neural_network()
         self.model.fit(self.x_train, self.y_train,
                        batch_size=self.batch_size,
@@ -58,48 +58,6 @@ class NNFullyConnectedModel:
         print('Test loss:', score[0])
         print('Test accuracy', score[1])
 
-    def __prepare_for_training(self, training, tests):
-        """
-        set self.dictionary, self.lable_types and
-        generate train_x(y) and test_x(y)
-        """
-        (word_vecs_train,
-         topics_train) = self.__convert_to_word_vecs(training, with_topic=True)
-        (word_vecs_test,
-         topics_test) = self.__convert_to_word_vecs(tests, with_topic=True)
-
-        # use dictionary and topic_types of training set
-        self.dictionary = corpora.Dictionary(word_vecs_train)
-        self.topic_types = list(set(topics_train))
-
-        (self.x_train,
-         self.y_train) = self.__adjust_format(word_vecs_train, topics_train)
-        (self.x_test,
-         self.y_test) = self.__adjust_format(word_vecs_test, topics_test)
-
-    def __adjust_format(self, word_vecs, topics=None):
-        bows = [self.dictionary.doc2bow(v) for v in word_vecs]
-        x = matutils.corpus2dense(bows, len(self.dictionary.keys())).T
-
-        y = None
-        if topics is not None:
-            y = [self.topic_types.index(l) for l in topics]
-            y = np.asarray(y, dtype=np.float32)
-            y = keras.utils.to_categorical(y, len(self.topic_types))
-        return (x, y)
-
-    def __convert_to_word_vecs(self, records, with_topic=False):
-        input_tag_tokenizer = InputTagTokenizer()
-        word_vecs = []
-        topics = []
-        test_topics = []
-        for r in records:
-            word_vecs.append(input_tag_tokenizer.get_attrs_value(r.html))
-            if with_topic:
-                # Note: use canonical topic instead of raw topic in mysql
-                topics.append(r.canonical_topic)
-        return (word_vecs, topics)
-
     def __construct_neural_network(self):
         model = Sequential()
         model.add(Dense(400,
@@ -109,7 +67,7 @@ class NNFullyConnectedModel:
         model.add(Dense(100, activation='relu'))
         model.add(Dropout(0.5))
         model.add(Dense(len(self.topic_types), activation='softmax'))
-        model.compile(loss=keras.losses.categorical_crossentropy,
-                      optimizer=keras.optimizers.Adadelta(),
+        model.compile(loss=categorical_crossentropy,
+                      optimizer=Adadelta(),
                       metrics=['accuracy'])
         return model
