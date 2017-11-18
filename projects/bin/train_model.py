@@ -3,8 +3,8 @@ import sys
 import os
 import yaml
 import argparse
-from semantic_selector import nn_fc_model
-from semantic_selector import datasource
+from semantic_selector.model.one_to_one import NNFullyConnectedModel
+from semantic_selector.mysql import InputTable
 
 
 def main():
@@ -21,12 +21,12 @@ def main():
     parser.add_argument('--debug', action='store_true')
     args = parser.parse_args()
 
-    (training, tests) = datasource.InputTags(args.threashold).fetch_data(args.ratio_test, args.seed)
+    (training, tests) = InputTable(args.threashold).fetch_data(args.ratio_test, args.seed)
 
     model_name = args.model_name
     print("model type: %s" % (model_name))
     if model_name == "nn_fc":
-        model = nn_fc_model.NNFullyConnectedModel()
+        model = NNFullyConnectedModel()
     else:
         print("model %s unknown" % (model_name))
         sys.exit(1)

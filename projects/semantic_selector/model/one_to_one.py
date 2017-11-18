@@ -9,7 +9,7 @@ from keras.models import load_model
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
-from semantic_selector import tokenizer
+from semantic_selector.tokenizer import InputTagTokenizer
 
 
 class NNFullyConnectedModel:
@@ -89,7 +89,7 @@ class NNFullyConnectedModel:
         return (x, y)
 
     def __convert_to_word_vecs(self, records, with_topic=False):
-        input_tag_tokenizer = tokenizer.InputTagTokenizer()
+        input_tag_tokenizer = InputTagTokenizer()
         word_vecs = []
         topics = []
         test_topics = []

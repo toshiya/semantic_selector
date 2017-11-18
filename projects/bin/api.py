@@ -1,7 +1,6 @@
 from attrdict import AttrDict
 from flask import Flask, request, jsonify, make_response, g
-from semantic_selector import nn_fc_model
-from semantic_selector import datasource
+from semantic_selector.model.one_to_one import NNFullyConnectedModel
 
 import os
 import yaml
@@ -13,7 +12,7 @@ model = None
 def startup():
     global model
     print("initializing model...")
-    model = nn_fc_model.NNFullyConnectedModel()
+    model = NNFullyConnectedModel()
     model.load()
 
 @app.route("/api/inference", methods=['POST'])
