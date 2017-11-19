@@ -43,7 +43,7 @@ class InferenceAdapter(Adapter):
         self.x_infer = self.generate_infered_data(options)
 
     @abstractmethod
-    def generate_infered_data():
+    def generate_infered_data(self, options):
         pass
 
 
