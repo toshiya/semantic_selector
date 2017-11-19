@@ -4,9 +4,7 @@ from keras.losses import categorical_crossentropy
 from keras.optimizers import Adadelta
 from keras.models import Sequential
 from keras.models import load_model
-from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
-from keras import backend as K
+from keras.layers import Dense, Dropout
 
 
 class NNFullyConnectedModel:
@@ -33,10 +31,8 @@ class NNFullyConnectedModel:
         with open("models/inputs.dict", "wb") as f:
             self.dictionary.save(f)
 
-    def inference_html(self, record):
-        (word_vecs, _) = self.__convert_to_word_vecs([record])
-        (numpy_vecs, _) = self.__adjust_format(word_vecs)
-        topic_id = self.model.predict(numpy_vecs)[0].argmax()
+    def inference_html(self, adapter):
+        topic_id = self.model.predict(adapter.x_infer)[0].argmax()
         return self.topic_name_from_id(topic_id)
 
     def topic_name_from_id(self, topic_id):

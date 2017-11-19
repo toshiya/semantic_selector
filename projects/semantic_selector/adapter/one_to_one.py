@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from abc import ABCMeta, abstractmethod
 import numpy as np
 from keras.utils import to_categorical
 from gensim import corpora, matutils
@@ -6,52 +7,89 @@ from semantic_selector.mysql import InputTable
 from semantic_selector.tokenizer import InputTagTokenizer
 
 
-# TODO
-#class JSONToNNFullyConnect(object):
+class Adapter(metaclass=ABCMeta):
+    def convert_to_word_vecs(self, records, with_topic=False):
+        """ Note: record must have attributes of html
+        """
+        input_tag_tokenizer = InputTagTokenizer()
+        word_vecs = []
+        for r in records:
+            word_vecs.append(input_tag_tokenizer.get_attrs_value(r.html))
+        return word_vecs
 
-class MySQLToNNFullyConnectAdapter(object):
-    def __init__(self, threashold, ratio, seed):
-        (training, tests) = InputTable(threashold).fetch_data(ratio, seed)
-        self.__prepare_for_training(training, tests)
+    def convert_to_topic_vecs(self, records, with_topic=False):
+        """
+        Note: record must have attributes of canonical_topic
+        """
+        topic_vecs = []
+        for r in records:
+            topic_vecs.append(r.canonical_topic)
+        return topic_vecs
 
-    def __prepare_for_training(self, training, tests):
+    def adjust_x_format(self, dictionary, word_vecs):
+        bows = [dictionary.doc2bow(v) for v in word_vecs]
+        x = matutils.corpus2dense(bows, len(dictionary.keys())).T
+        return x
+
+    def adjust_y_format(self, all_topics, topic_vecs):
+        y = [all_topics.index(l) for l in topic_vecs]
+        y = np.asarray(y, dtype=np.float32)
+        y = to_categorical(y, len(all_topics))
+        return y
+
+
+class InferenceAdapter(Adapter):
+    def __init__(self, options):
+        self.x_infer = self.generate_infered_data(options)
+
+    @abstractmethod
+    def generate_infered_data():
+        pass
+
+
+class TrainingAdapter(Adapter):
+    def __init__(self, options):
+        (self.x_train,
+         self.y_train,
+         self.x_test,
+         self.y_test,
+         self.dictionary,
+         self.topic_types) = self.generate_training_data(options)
+
+    @abstractmethod
+    def generate_training_data(self, options):
+        pass
+
+
+class JSONInferenceAdapter(InferenceAdapter):
+    def generate_infered_data(self, options):
+        record = options['record']
+        dictionary = options['dictionary']
+        word_vecs = self.convert_to_word_vecs([record])
+        return self.adjust_x_format(dictionary, word_vecs)
+
+
+class MySQLTrainingAdapter(TrainingAdapter):
+    def generate_training_data(self, options):
         """
         set self.dictionary, self.lable_types and
         generate train_x(y) and test_x(y)
         """
-        (word_vecs_train,
-         topics_train) = self.__convert_to_word_vecs(training, with_topic=True)
-        (word_vecs_test,
-         topics_test) = self.__convert_to_word_vecs(tests, with_topic=True)
+        input_table = InputTable(options['threashold'])
+        (training, test) = input_table.fetch_data(options['ratio_test'],
+                                                  options['seed'])
+
+        word_vecs_train = self.convert_to_word_vecs(training)
+        topic_vecs_train = self.convert_to_topic_vecs(training)
+        word_vecs_test = self.convert_to_word_vecs(test)
+        topic_vecs_test = self.convert_to_topic_vecs(test)
 
         # use dictionary and topic_types of training set
-        self.dictionary = corpora.Dictionary(word_vecs_train)
-        self.topic_types = list(set(topics_train))
+        dictionary = corpora.Dictionary(word_vecs_train)
+        all_topics = list(set(topic_vecs_train))
 
-        (self.x_train,
-         self.y_train) = self.__adjust_format(word_vecs_train, topics_train)
-        (self.x_test,
-         self.y_test) = self.__adjust_format(word_vecs_test, topics_test)
-
-    def __convert_to_word_vecs(self, records, with_topic=False):
-        input_tag_tokenizer = InputTagTokenizer()
-        word_vecs = []
-        topics = []
-        test_topics = []
-        for r in records:
-            word_vecs.append(input_tag_tokenizer.get_attrs_value(r.html))
-            if with_topic:
-                # Note: use canonical topic instead of raw topic in mysql
-                topics.append(r.canonical_topic)
-        return (word_vecs, topics)
-
-    def __adjust_format(self, word_vecs, topics=None):
-        bows = [self.dictionary.doc2bow(v) for v in word_vecs]
-        x = matutils.corpus2dense(bows, len(self.dictionary.keys())).T
-
-        y = None
-        if topics is not None:
-            y = [self.topic_types.index(l) for l in topics]
-            y = np.asarray(y, dtype=np.float32)
-            y = to_categorical(y, len(self.topic_types))
-        return (x, y)
+        x_train = self.adjust_x_format(dictionary, word_vecs_train)
+        y_train = self.adjust_y_format(all_topics, topic_vecs_train)
+        x_test = self.adjust_x_format(dictionary, word_vecs_test)
+        y_test = self.adjust_y_format(all_topics, topic_vecs_test)
+        return (x_train, y_train, x_test, y_test, dictionary, all_topics)
