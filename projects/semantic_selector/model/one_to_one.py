@@ -13,12 +13,12 @@ class NNFullyConnectedModel:
         self.batch_size = 200
         self.model = None
         self.dictionary = None
-        self.topic_types = None
+        self.all_topics = None
 
     def load(self):
         self.model = load_model("models/nn_fc_model.h5")
         with open("models/topics.pickle", "rb") as f:
-            self.topic_types = pickle.load(f)
+            self.all_topics = pickle.load(f)
         with open("models/inputs.dict", "rb") as f:
             self.dictionary = pickle.load(f)
 
@@ -27,7 +27,7 @@ class NNFullyConnectedModel:
             os.makedirs("models")
         self.model.save("models/nn_fc_model.h5")
         with open("models/topics.pickle", "wb") as f:
-            pickle.dump(self.topic_types, f)
+            pickle.dump(self.all_topics, f)
         with open("models/inputs.dict", "wb") as f:
             self.dictionary.save(f)
 
@@ -36,21 +36,20 @@ class NNFullyConnectedModel:
         return self.topic_name_from_id(topic_id)
 
     def topic_name_from_id(self, topic_id):
-        return self.topic_types[topic_id]
+        return self.all_topics[topic_id]
 
     def train(self, adapter, epochs=400):
         # receive attributes from adapter
-        for attr in adapter.__dict__.keys():
-            setattr(self, attr, adapter.__dict__[attr])
-
+        self.dictionary = adapter.dictionary
+        self.all_topics = adapter.all_topics
         self.model = self.__construct_neural_network()
-        self.model.fit(self.x_train, self.y_train,
+        self.model.fit(adapter.x_train, adapter.y_train,
                        batch_size=self.batch_size,
                        epochs=epochs,
                        verbose=1,
-                       validation_data=(self.x_test, self.y_test))
+                       validation_data=(adapter.x_test, adapter.y_test))
 
-        score = self.model.evaluate(self.x_test, self.y_test, verbose=0)
+        score = self.model.evaluate(adapter.x_test, adapter.y_test, verbose=0)
         print('Test loss:', score[0])
         print('Test accuracy', score[1])
 
@@ -62,7 +61,7 @@ class NNFullyConnectedModel:
         model.add(Dropout(0.5))
         model.add(Dense(100, activation='relu'))
         model.add(Dropout(0.5))
-        model.add(Dense(len(self.topic_types), activation='softmax'))
+        model.add(Dense(len(self.all_topics), activation='softmax'))
         model.compile(loss=categorical_crossentropy,
                       optimizer=Adadelta(),
                       metrics=['accuracy'])

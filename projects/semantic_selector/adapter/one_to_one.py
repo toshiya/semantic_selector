@@ -54,7 +54,7 @@ class TrainingAdapter(Adapter):
          self.x_test,
          self.y_test,
          self.dictionary,
-         self.topic_types) = self.generate_training_data(options)
+         self.all_topics) = self.generate_training_data(options)
 
     @abstractmethod
     def generate_training_data(self, options):
