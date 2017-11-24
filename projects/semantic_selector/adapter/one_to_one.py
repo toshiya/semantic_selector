@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from abc import ABCMeta, abstractmethod
 import numpy as np
-from keras.utils import to_categorical
 from gensim import corpora, matutils
 from semantic_selector.mysql import InputTable
 from semantic_selector.tokenizer import InputTagTokenizer
@@ -33,9 +32,16 @@ class Adapter(metaclass=ABCMeta):
 
     def adjust_y_format(self, all_topics, topic_vecs):
         y = [all_topics.index(l) for l in topic_vecs]
-        y = np.asarray(y, dtype=np.float32)
-        y = to_categorical(y, len(all_topics))
-        return y
+        y = np.asarray(y, dtype='int')
+
+        # Note:
+        # https://github.com/fchollet/keras/blob/master/keras/utils/np_utils.py
+        n = y.shape[0]
+        categorical = np.zeros((n, len(all_topics)))
+        categorical[np.arange(n), y] = 1
+        output_shape = y.shape + (len(all_topics),)
+        categorical = np.reshape(categorical, output_shape)
+        return categorical
 
 
 class InferenceAdapter(Adapter):
