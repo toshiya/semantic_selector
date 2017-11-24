@@ -1,20 +1,20 @@
 from attrdict import AttrDict
-from flask import Flask, request, jsonify, make_response, g
-from semantic_selector import nn_fc_model
-from semantic_selector import datasource
+from flask import Flask, request, jsonify, make_response
+from semantic_selector.model.one_to_one import NNFullyConnectedModel
+from semantic_selector.adapter.one_to_one import JSONInferenceAdapter
 
-import os
-import yaml
 
 app = Flask(__name__)
 model = None
+
 
 @app.before_first_request
 def startup():
     global model
     print("initializing model...")
-    model = nn_fc_model.NNFullyConnectedModel()
+    model = NNFullyConnectedModel()
     model.load()
+
 
 @app.route("/api/inference", methods=['POST'])
 def inference():
@@ -27,6 +27,8 @@ def inference():
         return make_response(err_message, 400)
 
     target_tag = AttrDict({'html': request.json["html"]})
-    estimated_topic = model.inference_html(target_tag)
+    options = {'record': target_tag, 'dictionary': model.dictionary}
+    adapter = JSONInferenceAdapter(options)
+    estimated_topic = model.inference_html(adapter)
     res = {"topic": estimated_topic}
     return jsonify(res)

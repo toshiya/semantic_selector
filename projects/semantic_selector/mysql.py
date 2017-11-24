@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import csv
 import mysql.connector
 import time
 import numpy as np
@@ -9,30 +8,17 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, Integer, String
 from sqlalchemy import create_engine, func
 from sqlalchemy.ext.hybrid import hybrid_property
-
-
-def read_canonical_topics():
-    canonical_topic_table = {}
-    file_path = os.path.abspath(os.path.dirname(__file__))
-    with open(os.path.join(file_path, '../docs/canonicalTopics.csv')) \
-            as csv_file:
-        reader = csv.reader(csv_file, delimiter=",")
-        for row in reader:
-            if row[0] in canonical_topic_table:
-                print(row[0])
-            canonical_topic_table[row[0]] = row[1]
-    return canonical_topic_table
+from semantic_selector.csv import CanonicalTopicTable
 
 
 class Input(declarative_base()):
-    canonical_table = read_canonical_topics()
     __tablename__ = 'inputs'
-
     id = Column(Integer, primary_key=True)
     url = Column(String)
     html = Column(String)
     parent_html = Column(String)
     topic = Column(String)
+    canonical_table = CanonicalTopicTable().get()
 
     @hybrid_property
     def canonical_topic(self):
@@ -45,7 +31,7 @@ class Input(declarative_base()):
                 self.url, self.html, self.topic)
 
 
-class InputTags(object):
+class InputTable(object):
     def __init__(self, exclude_threshold, connect_info=None):
         if connect_info is None:
             self.connect_info = \
