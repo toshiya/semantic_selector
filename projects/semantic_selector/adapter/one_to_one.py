@@ -5,24 +5,32 @@ from gensim import corpora, matutils
 from semantic_selector.mysql import InputTable
 from semantic_selector.tokenizer import InputTagTokenizer
 
+def get_attribute(e, key):
+    if isinstance(e, dict):
+        return e[key]
+    else:
+        return getattr(e, key)
+
 
 class Adapter(metaclass=ABCMeta):
-    def convert_to_word_vecs(self, records, with_topic=False):
+    def convert_to_word_vecs(self, records):
         """ Note: record must have attributes of html
         """
         input_tag_tokenizer = InputTagTokenizer()
         word_vecs = []
         for r in records:
-            word_vecs.append(input_tag_tokenizer.get_attrs_value(r.html))
+            html = get_attribute(r, 'html')
+            word_vecs.append(input_tag_tokenizer.get_attrs_value(html))
         return word_vecs
 
-    def convert_to_topic_vecs(self, records, with_topic=False):
+    def convert_to_topic_vecs(self, records):
         """
         Note: record must have attributes of canonical_topic
         """
         topic_vecs = []
         for r in records:
-            topic_vecs.append(r.canonical_topic)
+            canonical_topic = get_attribute(r, 'canonical_topic')
+            topic_vecs.append(canonical_topic)
         return topic_vecs
 
     def adjust_x_format(self, dictionary, word_vecs):
