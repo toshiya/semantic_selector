@@ -34,11 +34,15 @@ class Adapter(metaclass=ABCMeta):
         return topic_vecs
 
     def adjust_x_format(self, dictionary, word_vecs):
+        if len(word_vecs) == 0:
+            return None
         bows = [dictionary.doc2bow(v) for v in word_vecs]
         x = matutils.corpus2dense(bows, len(dictionary.keys())).T
         return x
 
     def adjust_y_format(self, all_topics, topic_vecs):
+        if len(topic_vecs) == 0:
+            return None
         y = [all_topics.index(l) for l in topic_vecs]
         y = np.asarray(y, dtype='int')
 
@@ -90,8 +94,13 @@ class MySQLTrainingAdapter(TrainingAdapter):
         generate train_x(y) and test_x(y)
         """
         input_table = InputTable(options['threashold'])
-        (training, test) = input_table.fetch_data(options['ratio_test'],
-                                                  options['seed'])
+        all_data = input_table.fetch_data()
+
+        n = len(all_data)
+        np.random.seed(options['seed'])
+        perm = np.random.permutation(n)[0:int(n * options['ratio_test'])]
+        training = [all_data[i] for i in range(0, n) if i not in perm]
+        test = [all_data[i] for i in perm]
 
         word_vecs_train = self.convert_to_word_vecs(training)
         topic_vecs_train = self.convert_to_topic_vecs(training)

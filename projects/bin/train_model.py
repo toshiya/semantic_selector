@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import sys
 import argparse
-from semantic_selector.model.one_to_one import NNFullyConnectedModel
-from semantic_selector.adapter.one_to_one import MySQLTrainingAdapter
 
 
 def main():
@@ -28,7 +26,21 @@ def main():
     model_name = args.model_name
     print("model type: %s" % (model_name))
     if model_name == "nn_fc":
+        from semantic_selector.model.one_to_one import NNFullyConnectedModel
+        from semantic_selector.adapter.one_to_one import MySQLTrainingAdapter
         model = NNFullyConnectedModel()
+        options = {
+            'threashold': args.threashold,
+            'ratio_test': args.ratio_test,
+            'seed': args.seed,
+        }
+        adapter = MySQLTrainingAdapter(options)
+        model.train(adapter, args.epochs)
+        model.save()
+    elif model_name == "lstm":
+        from semantic_selector.model.many_to_many import NNLSTMModel
+        from semantic_selector.adapter.many_to_many import MySQLTrainingAdapter
+        model = NNLSTMModel()
         options = {
             'threashold': args.threashold,
             'ratio_test': args.ratio_test,

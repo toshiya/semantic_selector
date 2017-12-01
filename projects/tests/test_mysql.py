@@ -14,10 +14,8 @@ class TestMysql(unittest.TestCase):
                 ]
         mock_query.return_value = dummy
         input_table = InputTable(exclude_threshold=0)
-        (training, tests) = input_table.fetch_data(ratio_test_data=0,
-                                                   seed=100)
-        self.assertEqual(len(training), 2)
-        self.assertEqual(len(tests), 0)
+        raw_data = input_table.fetch_data()
+        self.assertEqual(len(raw_data), 2)
 
 
 if __name__ == '__main__':

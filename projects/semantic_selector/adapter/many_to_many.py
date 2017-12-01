@@ -11,14 +11,14 @@ class ManyToManyAdapter(Adapter):
 
 class TrainingAdapter(ManyToManyAdapter):
     def __init__(self, options):
-        (train, test) = self.get_raw_data(options)
+        raw_data = self.get_raw_data(options)
         (self.x_train,
          self.y_train,
          self.x_test,
          self.y_test,
          self.max_num_input_tags,
          self.dictionary,
-         self.all_topics) = self.make_training_data(train, test)
+         self.all_topics) = self.make_training_data(raw_data, options)
 
     # shape must be 2 dimensional
     def pad(self, vec, shape, dtype):
@@ -35,7 +35,7 @@ class TrainingAdapter(ManyToManyAdapter):
         topic_vecs = self.convert_to_topic_vecs(records)
         return list(set(topic_vecs))
 
-    def make_pages(self, records):
+    def make_pages(self, records, options):
         if len(records) == 0:
             return ([], 0)
         pages = []
@@ -52,7 +52,15 @@ class TrainingAdapter(ManyToManyAdapter):
             current_page.append(record)
             previous_url = url
         pages.append(current_page)
-        return (pages, max_num_input_tags)
+
+        n = len(pages)
+        np.random.seed(options['seed'])
+        perm = np.random.permutation(n)[0:int(n * options['ratio_test'])]
+        print(perm)
+        train = [pages[i] for i in range(0, n) if i not in perm]
+        test = [pages[i] for i in perm]
+
+        return (train, test, max_num_input_tags)
 
     def convert_to_x_y(self, pages,
                        max_num_input_tags,
@@ -78,13 +86,13 @@ class TrainingAdapter(ManyToManyAdapter):
             y = np.append(y, np.array([numpy_topic_vecs]), axis=0)
         return (x, y)
 
-    def make_training_data(self, train, test):
-        dictionary = self.make_dictionary(train)
-        all_topics = self.make_all_topics(train)
+    def make_training_data(self, raw_data, options):
+        dictionary = self.make_dictionary(raw_data)
+        all_topics = self.make_all_topics(raw_data)
 
-        (pages_train, max_train) = self.make_pages(train)
-        (pages_test, max_test) = self.make_pages(test)
-        max_num_input_tags = max(max_train, max_test)
+        (pages_train,
+         pages_test,
+         max_num_input_tags) = self.make_pages(raw_data, options)
 
         (x_train, y_train) = self.convert_to_x_y(pages_train,
                                                  max_num_input_tags,
@@ -106,14 +114,10 @@ class TrainingAdapter(ManyToManyAdapter):
 
 class JSONTrainingAdapter(TrainingAdapter):
     def get_raw_data(self, options):
-        train = options['samples']['train']
-        test = options['samples']['test']
-        return (train, test)
+        return options['samples']
 
 
 class MySQLTrainingAdapter(TrainingAdapter):
     def get_raw_data(self, options):
         input_table = InputTable(options['threashold'])
-        (train, test) = input_table.fetch_data(options['ratio_test'],
-                                               options['seed'])
-        return (train, test)
+        return input_table.fetch_data()

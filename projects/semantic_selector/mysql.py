@@ -41,17 +41,8 @@ class InputTable(object):
         self.exclude_threshold = exclude_threshold
         self.session = None
 
-    def fetch_data(self, ratio_test_data, seed):
-        all_data = self.query()
-        n = len(all_data)
-        if os.getenv('N_TEST_DATA'):
-            perm = [int(x) for x in os.getenv('N_TEST_DATA').split(',')]
-        else:
-            np.random.seed(seed)
-            perm = np.random.permutation(n)[0:int(n * ratio_test_data)]
-        test_data = [all_data[i] for i in perm]
-        training_data = [all_data[i] for i in range(0, n) if i not in perm]
-        return (training_data, test_data)
+    def fetch_data(self):
+        return self.query()
 
     def __get_session(self):
         if self.session is None:
