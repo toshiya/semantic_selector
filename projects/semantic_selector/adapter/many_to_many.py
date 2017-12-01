@@ -56,7 +56,6 @@ class TrainingAdapter(ManyToManyAdapter):
         n = len(pages)
         np.random.seed(options['seed'])
         perm = np.random.permutation(n)[0:int(n * options['ratio_test'])]
-        print(perm)
         train = [pages[i] for i in range(0, n) if i not in perm]
         test = [pages[i] for i in perm]
 

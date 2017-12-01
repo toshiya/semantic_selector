@@ -11,7 +11,7 @@ from keras.layers import Dense, Dropout, LSTM, TimeDistributed
 class NNLSTMModel:
 
     def __init__(self):
-        self.batch_size = 10
+        self.batch_size = 100
         self.model = None
         self.dictionary = None
         self.all_topics = None
@@ -53,6 +53,7 @@ class NNLSTMModel:
         self.dictionary = adapter.dictionary
         self.all_topics = adapter.all_topics
         self.max_num_input_tags = adapter.max_num_input_tags
+
         self.model = self.__construct_neural_network()
         self.model.fit(adapter.x_train, adapter.y_train,
                        batch_size=self.batch_size,
@@ -69,7 +70,7 @@ class NNLSTMModel:
         dict_size = len(self.dictionary.keys())
         topic_size = len(self.all_topics)
         input_shape = (self.max_num_input_tags, dict_size)
-        model.add(LSTM(400,
+        model.add(LSTM(100,
                        activation='relu',
                        input_shape=input_shape,
                        return_sequences=True))
