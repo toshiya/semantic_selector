@@ -5,7 +5,7 @@ from semantic_selector.adapter.many_to_many import JSONTrainingAdapter
 
 class TestJSONTrainingAdapter(unittest.TestCase):
     email_html = "<input type='text' name='mail_addr' placeholder='メールアドレス'>"
-    password_html = "<input type='password' name='pass' placeholder='パスワード'>"
+    password_html = "<input type='password' name='pass'>"
 
     data = [
         {
@@ -57,14 +57,21 @@ class TestJSONTrainingAdapter(unittest.TestCase):
         adapter = JSONTrainingAdapter(options)
 
         dict_size = len(adapter.dictionary.keys())
-        self.assertEqual(dict_size, 7)
+        self.assertEqual(dict_size, 6)
 
-        max_num_input_tags = adapter.max_num_input_tags
-        self.assertEqual(max_num_input_tags, 2)
-        self.assertEqual(adapter.x_train.shape, (3, max_num_input_tags, 7))
-        self.assertEqual(adapter.y_train.shape, (3, max_num_input_tags, 2))
-        self.assertEqual(adapter.x_test.shape, (1, max_num_input_tags, 7))
-        self.assertEqual(adapter.y_test.shape, (1, max_num_input_tags, 2))
+        topic_size = len(adapter.topics)
+        self.assertEqual(topic_size, 3)
+
+        self.assertEqual(adapter.max_tag_count, 2)
+        self.assertEqual(adapter.max_word_count, 4)
+
+        expected_page_count = 3
+        self.assertEqual(adapter.x_train.shape, (expected_page_count,
+                                                 adapter.max_tag_count,
+                                                 adapter.max_word_count))
+        self.assertEqual(adapter.y_train.shape, (expected_page_count,
+                                                 adapter.max_tag_count,
+                                                 topic_size))
 
 
 if __name__ == '__main__':

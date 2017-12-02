@@ -68,14 +68,14 @@ class NNLSTMModel:
     def __construct_neural_network(self):
         model = Sequential()
         dict_size = len(self.dictionary.keys())
-        topic_size = len(self.all_topics)
+        topic_counts = len(self.all_topics)
         input_shape = (self.max_num_input_tags, dict_size)
         model.add(LSTM(100,
                        activation='relu',
                        input_shape=input_shape,
                        return_sequences=True))
         model.add(Dropout(0.5))
-        mlp = TimeDistributed(Dense(topic_size, activation='softmax'))
+        mlp = TimeDistributed(Dense(topic_counts, activation='softmax'))
         model.add(mlp)
         model.compile(loss=categorical_crossentropy,
                       optimizer=Adam(),

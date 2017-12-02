@@ -36,14 +36,17 @@ class Adapter(metaclass=ABCMeta):
     def adjust_x_format(self, dictionary, word_vecs):
         if len(word_vecs) == 0:
             return None
-        bows = [dictionary.doc2bow(v) for v in word_vecs]
-        x = matutils.corpus2dense(bows, len(dictionary.keys())).T
-        return x
+        word_id_vecs = []
+        for word_vec in word_vecs:
+            # +1 for keep 0 as mask
+            word_id_vec = [(dictionary.token2id[w] + 1) for w in word_vec]
+            word_id_vecs.append(word_id_vec)
+        return word_id_vecs
 
     def adjust_y_format(self, all_topics, topic_vecs):
         if len(topic_vecs) == 0:
             return None
-        y = [all_topics.index(l) for l in topic_vecs]
+        y = [(all_topics.index(l)) for l in topic_vecs]
         y = np.asarray(y, dtype='int')
 
         # Note:
