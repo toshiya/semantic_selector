@@ -16,34 +16,31 @@ class TrainingAdapter(ManyToManyAdapter):
          self.y_train,
          self.x_test,
          self.y_test,
-         self.max_tag_count,
          self.max_word_count,
          self.dictionary,
          self.topics) = self.make_training_data(raw_data, options)
 
-    # shape must be 2 dimensional
-    def pad(self, vec, shape, dtype):
-        # pad extra feature with zero value
+    def pad(self, vec, feat_len, dtype):
         for i in range(0, len(vec)):
-            if len(vec[i]) < shape[1]:
-                for j in range(0, shape[1] - len(vec[i])):
+            if len(vec[i]) < feat_len:
+                for j in range(0, feat_len - len(vec[i])):
                     vec[i].append(0)
-
-        # pad time series with zero vector
-        for i in range(0, shape[0] - len(vec)):
-            v = np.zeros((1, shape[1]), dtype=dtype)
-            vec = np.append(vec, v, axis=0)
         return vec
+
+    def get_eos_word_vecs(self):
+        return ["EOSEOSEOS"]
 
     def make_dictionary(self, records):
         word_vecs = self.convert_to_word_vecs(records)
+        word_vecs.append(self.get_eos_word_vecs())
         return corpora.Dictionary(word_vecs)
 
     def make_topics(self, records):
         topic_vecs = self.convert_to_topic_vecs(records)
         topics = list(set(topic_vecs))
-        # keep index 0 as mask
+        # special labels
         topics.insert(0, 'mask')
+        topics.append('eos')
         return topics
 
     def make_pages(self, records, options):
@@ -52,80 +49,85 @@ class TrainingAdapter(ManyToManyAdapter):
         pages = []
         previous_url = None
         current_page = []
-        max_tag_count = 0
         for record in records:
             url = get_attribute(record, 'url')
             if (previous_url != url) and (len(current_page) != 0):
-                if max_tag_count < len(current_page):
-                    max_tag_count = len(current_page)
                 pages.append(current_page)
                 current_page = []
             current_page.append(record)
             previous_url = url
         pages.append(current_page)
 
-        return (pages, max_tag_count)
+        return pages
 
     def convert_to_x_y(self,
                        pages,
-                       max_tag_count,
                        dictionary,
-                       topics):
-        topic_count = len(topics)
+                       topics,
+                       options):
 
         max_word_count = 0
         for page in pages:
             word_vecs = self.convert_to_word_vecs(page)
+            word_vecs.append(self.get_eos_word_vecs())
             for word_vec in word_vecs:
                 if max_word_count < len(word_vec):
                     max_word_count = len(word_vec)
 
-        x = np.empty((0, max_tag_count, max_word_count), dtype='float64')
-        y = np.empty((0, max_tag_count, topic_count), dtype='float64')
-        for page in pages:
-            word_vecs = self.convert_to_word_vecs(page)
-            word_id_vecs = self.adjust_x_format(dictionary, word_vecs)
-            word_id_vecs = self.pad(word_id_vecs,
-                                    (max_tag_count, max_word_count),
-                                    'float64')
-            x = np.append(x, np.array([word_id_vecs]), axis=0)
-
-            topic_vecs = self.convert_to_topic_vecs(page)
-            topic_one_hot_vecs = self.adjust_y_format(topics, topic_vecs)
-            topic_one_hot_vecs = self.pad(topic_one_hot_vecs,
-                                          (max_tag_count, topic_count),
-                                          'float64')
-            y = np.append(y, np.array([topic_one_hot_vecs]), axis=0)
-
-        return (x, y, max_word_count)
-
-    def make_training_data(self, raw_data, options):
-        dictionary = self.make_dictionary(raw_data)
-        topics = self.make_topics(raw_data)
-
-        (pages, max_tag_count) = self.make_pages(raw_data, options)
-        (x, y, max_word_count) = self.convert_to_x_y(pages,
-                                                     max_tag_count,
-                                                     dictionary,
-                                                     topics)
+        topic_count = len(topics)
+        x_train = np.empty((0, max_word_count), dtype='float64')
+        y_train = np.empty((0, 1, topic_count), dtype='float64')
+        x_test = np.empty((0, max_word_count), dtype='float64')
+        y_test = np.empty((0, 1, topic_count), dtype='float64')
 
         n = len(pages)
         np.random.seed(options['seed'])
         test_indices = np.random\
                          .permutation(n)[0:int(n * options['ratio_test'])]
-        train_indices = np.arange(n)
-        for i in test_indices:
-            train_indices = np.delete(train_indices, i)
 
-        print(train_indices)
+        for (i, page) in enumerate(pages):
 
-        x_train = x[train_indices]
-        y_train = y[train_indices]
-        x_test = x[test_indices]
-        y_test = y[test_indices]
+            word_vecs = self.convert_to_word_vecs(page)
+            topic_vecs = self.convert_to_topic_vecs(page)
+            # append eos information
+            word_vecs.append(self.get_eos_word_vecs())
+            topic_vecs.append('eos')
+
+            word_id_vecs = self.adjust_x_format(dictionary, word_vecs)
+            word_id_vecs = self.pad(word_id_vecs, max_word_count, 'float64')
+            word_id_vecs = np.array(word_id_vecs)
+            topic_one_hot_vecs = self.adjust_y_format(topics, topic_vecs)
+            topic_one_hot_vecs = np.array(topic_one_hot_vecs)\
+                                   .reshape(topic_one_hot_vecs.shape[0],
+                                            1,
+                                            topic_one_hot_vecs.shape[1])
+
+            if i in test_indices:
+                x_test = np.append(x_test, word_id_vecs, axis=0)
+                y_test = np.append(y_test, topic_one_hot_vecs, axis=0)
+            else:
+                x_train = np.append(x_train, word_id_vecs, axis=0)
+                y_train = np.append(y_train, topic_one_hot_vecs, axis=0)
+
+        return (x_train, y_train, x_test, y_test, max_word_count)
+
+    def make_training_data(self, raw_data, options):
+        dictionary = self.make_dictionary(raw_data)
+        topics = self.make_topics(raw_data)
+
+        pages = self.make_pages(raw_data, options)
+
+        (x_train,
+         y_train,
+         x_test,
+         y_test,
+         max_word_count) = self.convert_to_x_y(pages,
+                                               dictionary,
+                                               topics,
+                                               options)
 
         return (x_train, y_train, x_test, y_test,
-                max_tag_count, max_word_count, dictionary, topics)
+                max_word_count, dictionary, topics)
 
     @abstractmethod
     def get_raw_data(self, options):

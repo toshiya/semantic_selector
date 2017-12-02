@@ -5,21 +5,24 @@ from keras.losses import categorical_crossentropy
 from keras.optimizers import Adam
 from keras.models import Sequential
 from keras.models import load_model
-from keras.layers import Dense, Dropout, LSTM, TimeDistributed
+from keras.layers.embeddings import Embedding
+from keras.layers import Dense, LSTM, TimeDistributed
 
 
 class NNLSTMModel:
 
     def __init__(self):
-        self.batch_size = 100
+        self.batch_size = 400
+        self.hidden_size = 100
+        self.embed_size = 64
         self.model = None
         self.dictionary = None
-        self.all_topics = None
+        self.topics = None
 
     def load(self):
         self.model = load_model("models/lstm_model.h5")
         with open("models/topics.pickle", "rb") as f:
-            self.all_topics = pickle.load(f)
+            self.topics = pickle.load(f)
         with open("models/inputs.dict", "rb") as f:
             self.dictionary = pickle.load(f)
 
@@ -28,7 +31,7 @@ class NNLSTMModel:
             os.makedirs("models")
         self.model.save("models/lstm_model.h5")
         with open("models/topics.pickle", "wb") as f:
-            pickle.dump(self.all_topics, f)
+            pickle.dump(self.topics, f)
         with open("models/inputs.dict", "wb") as f:
             self.dictionary.save(f)
 
@@ -46,13 +49,13 @@ class NNLSTMModel:
         if topic_id == -1:
             return 'padding'
         else:
-            return self.all_topics[topic_id]
+            return self.topics[topic_id]
 
     def train(self, adapter, epochs=400):
         # receive attributes from adapter
         self.dictionary = adapter.dictionary
-        self.all_topics = adapter.all_topics
-        self.max_num_input_tags = adapter.max_num_input_tags
+        self.topics = adapter.topics
+        self.max_word_count = adapter.max_word_count
 
         self.model = self.__construct_neural_network()
         self.model.fit(adapter.x_train, adapter.y_train,
@@ -67,16 +70,19 @@ class NNLSTMModel:
 
     def __construct_neural_network(self):
         model = Sequential()
-        dict_size = len(self.dictionary.keys())
-        topic_counts = len(self.all_topics)
-        input_shape = (self.max_num_input_tags, dict_size)
-        model.add(LSTM(100,
+        # 0 is reserverd for mask 0
+        vocab_count = len(self.dictionary.keys()) + 1
+        topic_count = len(self.topics)
+
+        model.add(Embedding(vocab_count, self.embed_size, mask_zero=True))
+        model.add(LSTM(self.hidden_size,
                        activation='relu',
-                       input_shape=input_shape,
+                       dropout=0.5,
                        return_sequences=True))
-        model.add(Dropout(0.5))
-        mlp = TimeDistributed(Dense(topic_counts, activation='softmax'))
-        model.add(mlp)
+        model.add(TimeDistributed(Dense(topic_count, activation='softmax')))
+
+        model.summary()
+
         model.compile(loss=categorical_crossentropy,
                       optimizer=Adam(),
                       metrics=['accuracy'])

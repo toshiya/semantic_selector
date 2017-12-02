@@ -57,21 +57,17 @@ class TestJSONTrainingAdapter(unittest.TestCase):
         adapter = JSONTrainingAdapter(options)
 
         dict_size = len(adapter.dictionary.keys())
-        self.assertEqual(dict_size, 6)
+        self.assertEqual(dict_size, 7)
 
         topic_size = len(adapter.topics)
-        self.assertEqual(topic_size, 3)
+        self.assertEqual(topic_size, 4)
 
-        self.assertEqual(adapter.max_tag_count, 2)
         self.assertEqual(adapter.max_word_count, 4)
 
-        expected_page_count = 3
-        self.assertEqual(adapter.x_train.shape, (expected_page_count,
-                                                 adapter.max_tag_count,
-                                                 adapter.max_word_count))
-        self.assertEqual(adapter.y_train.shape, (expected_page_count,
-                                                 adapter.max_tag_count,
-                                                 topic_size))
+        self.assertEqual(adapter.x_train.shape, (7, 4))
+        self.assertEqual(adapter.y_train.shape, (7, 1, 4))
+        self.assertEqual(adapter.x_test.shape, (2, 4))
+        self.assertEqual(adapter.y_test.shape, (2, 1, 4))
 
 
 if __name__ == '__main__':

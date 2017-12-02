@@ -33,9 +33,9 @@ class TestMySQLTrainingAdapter(unittest.TestCase):
         self.assertTrue('a' in list(adapter.dictionary.values()))
         self.assertTrue('b' in list(adapter.dictionary.values()))
 
-        self.assertEqual(len(adapter.all_topics), 2)
-        self.assertTrue('email' in list(adapter.all_topics))
-        self.assertTrue('password' in list(adapter.all_topics))
+        self.assertEqual(len(adapter.topics), 2)
+        self.assertTrue('email' in list(adapter.topics))
+        self.assertTrue('password' in list(adapter.topics))
 
 
 if __name__ == '__main__':

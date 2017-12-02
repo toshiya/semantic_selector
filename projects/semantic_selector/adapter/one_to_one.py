@@ -43,18 +43,18 @@ class Adapter(metaclass=ABCMeta):
             word_id_vecs.append(word_id_vec)
         return word_id_vecs
 
-    def adjust_y_format(self, all_topics, topic_vecs):
+    def adjust_y_format(self, topics, topic_vecs):
         if len(topic_vecs) == 0:
             return None
-        y = [(all_topics.index(l)) for l in topic_vecs]
+        y = [(topics.index(l)) for l in topic_vecs]
         y = np.asarray(y, dtype='int')
 
         # Note:
         # https://github.com/fchollet/keras/blob/master/keras/utils/np_utils.py
         n = y.shape[0]
-        categorical = np.zeros((n, len(all_topics)))
+        categorical = np.zeros((n, len(topics)))
         categorical[np.arange(n), y] = 1
-        output_shape = y.shape + (len(all_topics),)
+        output_shape = y.shape + (len(topics),)
         categorical = np.reshape(categorical, output_shape)
         return categorical
 
@@ -75,7 +75,7 @@ class TrainingAdapter(Adapter):
          self.x_test,
          self.y_test,
          self.dictionary,
-         self.all_topics) = self.generate_training_data(options)
+         self.topics) = self.generate_training_data(options)
 
     @abstractmethod
     def generate_training_data(self, options):
@@ -112,10 +112,10 @@ class MySQLTrainingAdapter(TrainingAdapter):
 
         # use dictionary and topic_types of training set
         dictionary = corpora.Dictionary(word_vecs_train)
-        all_topics = list(set(topic_vecs_train))
+        topics = list(set(topic_vecs_train))
 
         x_train = self.adjust_x_format(dictionary, word_vecs_train)
-        y_train = self.adjust_y_format(all_topics, topic_vecs_train)
+        y_train = self.adjust_y_format(topics, topic_vecs_train)
         x_test = self.adjust_x_format(dictionary, word_vecs_test)
-        y_test = self.adjust_y_format(all_topics, topic_vecs_test)
-        return (x_train, y_train, x_test, y_test, dictionary, all_topics)
+        y_test = self.adjust_y_format(topics, topic_vecs_test)
+        return (x_train, y_train, x_test, y_test, dictionary, topics)
