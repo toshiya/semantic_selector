@@ -5,41 +5,56 @@ from gensim import corpora, matutils
 from semantic_selector.mysql import InputTable
 from semantic_selector.tokenizer import InputTagTokenizer
 
+def get_attribute(e, key):
+    if isinstance(e, dict):
+        return e[key]
+    else:
+        return getattr(e, key)
+
 
 class Adapter(metaclass=ABCMeta):
-    def convert_to_word_vecs(self, records, with_topic=False):
+    def convert_to_word_vecs(self, records):
         """ Note: record must have attributes of html
         """
         input_tag_tokenizer = InputTagTokenizer()
         word_vecs = []
         for r in records:
-            word_vecs.append(input_tag_tokenizer.get_attrs_value(r.html))
+            html = get_attribute(r, 'html')
+            word_vecs.append(input_tag_tokenizer.get_attrs_value(html))
         return word_vecs
 
-    def convert_to_topic_vecs(self, records, with_topic=False):
+    def convert_to_topic_vecs(self, records):
         """
         Note: record must have attributes of canonical_topic
         """
         topic_vecs = []
         for r in records:
-            topic_vecs.append(r.canonical_topic)
+            canonical_topic = get_attribute(r, 'canonical_topic')
+            topic_vecs.append(canonical_topic)
         return topic_vecs
 
     def adjust_x_format(self, dictionary, word_vecs):
-        bows = [dictionary.doc2bow(v) for v in word_vecs]
-        x = matutils.corpus2dense(bows, len(dictionary.keys())).T
-        return x
+        if len(word_vecs) == 0:
+            return None
+        word_id_vecs = []
+        for word_vec in word_vecs:
+            # +1 for keep 0 as mask
+            word_id_vec = [(dictionary.token2id[w] + 1) for w in word_vec]
+            word_id_vecs.append(word_id_vec)
+        return word_id_vecs
 
-    def adjust_y_format(self, all_topics, topic_vecs):
-        y = [all_topics.index(l) for l in topic_vecs]
+    def adjust_y_format(self, topics, topic_vecs):
+        if len(topic_vecs) == 0:
+            return None
+        y = [(topics.index(l)) for l in topic_vecs]
         y = np.asarray(y, dtype='int')
 
         # Note:
         # https://github.com/fchollet/keras/blob/master/keras/utils/np_utils.py
         n = y.shape[0]
-        categorical = np.zeros((n, len(all_topics)))
+        categorical = np.zeros((n, len(topics)))
         categorical[np.arange(n), y] = 1
-        output_shape = y.shape + (len(all_topics),)
+        output_shape = y.shape + (len(topics),)
         categorical = np.reshape(categorical, output_shape)
         return categorical
 
@@ -60,7 +75,7 @@ class TrainingAdapter(Adapter):
          self.x_test,
          self.y_test,
          self.dictionary,
-         self.all_topics) = self.generate_training_data(options)
+         self.topics) = self.generate_training_data(options)
 
     @abstractmethod
     def generate_training_data(self, options):
@@ -82,8 +97,13 @@ class MySQLTrainingAdapter(TrainingAdapter):
         generate train_x(y) and test_x(y)
         """
         input_table = InputTable(options['threashold'])
-        (training, test) = input_table.fetch_data(options['ratio_test'],
-                                                  options['seed'])
+        all_data = input_table.fetch_data()
+
+        n = len(all_data)
+        np.random.seed(options['seed'])
+        perm = np.random.permutation(n)[0:int(n * options['ratio_test'])]
+        training = [all_data[i] for i in range(0, n) if i not in perm]
+        test = [all_data[i] for i in perm]
 
         word_vecs_train = self.convert_to_word_vecs(training)
         topic_vecs_train = self.convert_to_topic_vecs(training)
@@ -92,10 +112,10 @@ class MySQLTrainingAdapter(TrainingAdapter):
 
         # use dictionary and topic_types of training set
         dictionary = corpora.Dictionary(word_vecs_train)
-        all_topics = list(set(topic_vecs_train))
+        topics = list(set(topic_vecs_train))
 
         x_train = self.adjust_x_format(dictionary, word_vecs_train)
-        y_train = self.adjust_y_format(all_topics, topic_vecs_train)
+        y_train = self.adjust_y_format(topics, topic_vecs_train)
         x_test = self.adjust_x_format(dictionary, word_vecs_test)
-        y_test = self.adjust_y_format(all_topics, topic_vecs_test)
-        return (x_train, y_train, x_test, y_test, dictionary, all_topics)
+        y_test = self.adjust_y_format(topics, topic_vecs_test)
+        return (x_train, y_train, x_test, y_test, dictionary, topics)
