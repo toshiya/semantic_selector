@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import argparse
-from semantic_selector.model.one_to_one import NNFullyConnectedModel
+from semantic_selector.model.one_to_one import LsiModel, NNFullyConnectedModel
 from semantic_selector.adapter.one_to_one import MySQLTrainingAdapter
 
 
@@ -37,6 +37,15 @@ def main():
         adapter = MySQLTrainingAdapter(options)
         model.train(adapter, args.epochs)
         model.save()
+    elif model_name == "lsi":
+        model = LsiModel()
+        options = {
+            'threashold': args.threashold,
+            'ratio_test': args.ratio_test,
+            'seed': args.seed,
+        }
+        adapter = MySQLTrainingAdapter(options)
+        model.train(adapter)
     else:
         print("model %s unknown" % (model_name))
         sys.exit(1)

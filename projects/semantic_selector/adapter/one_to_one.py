@@ -90,6 +90,12 @@ class MySQLTrainingAdapter(TrainingAdapter):
         word_vecs_test = self.convert_to_word_vecs(test)
         topic_vecs_test = self.convert_to_topic_vecs(test)
 
+        # Temp
+        self.word_vecs_train = word_vecs_train
+        self.topic_vecs_train = topic_vecs_train
+        self.word_vecs_test = word_vecs_test
+        self.topic_vecs_test = topic_vecs_test
+
         # use dictionary and topic_types of training set
         dictionary = corpora.Dictionary(word_vecs_train)
         all_topics = list(set(topic_vecs_train))
