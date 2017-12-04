@@ -22,11 +22,10 @@ class Input(declarative_base()):
 
     @hybrid_property
     def canonical_topic(self):
-        return self.topic
-        #if self.topic in Input.canonical_table:
-        #    return self.canonical_table[self.topic]
-        #else:
-        #    return 'unknown'
+        if self.topic in Input.canonical_table:
+            return self.canonical_table[self.topic]
+        else:
+            return 'unknown'
 
     def __repr__(self): return "<Input(url='%s', html='%s', topic='%s')>" % (
                 self.url, self.html, self.topic)

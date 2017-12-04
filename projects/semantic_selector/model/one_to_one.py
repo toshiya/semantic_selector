@@ -95,6 +95,7 @@ class NNFullyConnectedModel(OneToOneModel):
         model.add(Dense(100, activation='relu'))
         model.add(Dropout(0.5))
         model.add(Dense(len(self.all_topics), activation='softmax'))
+        model.summary()
         model.compile(loss=categorical_crossentropy,
                       optimizer=Adadelta(),
                       metrics=['accuracy'])
@@ -110,7 +111,7 @@ class LsiModel(OneToOneModel):
     No support to save and load the model for api server.
     """
     def __init__(self):
-        self.hidden_size = 1000
+        self.hidden_size = 500
         self.lr_solver = 'newton-cg'
         self.lr_max_iter = 10000
         self.lr_multi_class = 'ovr'
