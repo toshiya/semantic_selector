@@ -6,6 +6,7 @@ from .base import Adapter
 
 class TrainingAdapter(Adapter):
     def __init__(self, options):
+        super().__init__()
         (self.be_train,
          self.ot_train,
          self.be_test,

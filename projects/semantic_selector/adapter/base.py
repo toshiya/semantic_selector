@@ -5,7 +5,18 @@ from gensim import matutils
 from semantic_selector.tokenizer import InputTagTokenizer
 
 
+def get_attribute(e, key):
+    if isinstance(e, dict):
+        return e[key]
+    else:
+        return getattr(e, key)
+
+
 class Adapter(metaclass=ABCMeta):
+    def __init__(self):
+        self.dictionary = None
+        self.all_topics = None
+
     def convert_to_word_vecs(self, records):
         """
         Note: record must have attributes of html
@@ -13,7 +24,8 @@ class Adapter(metaclass=ABCMeta):
         input_tag_tokenizer = InputTagTokenizer()
         word_vecs = []
         for r in records:
-            word_vecs.append(input_tag_tokenizer.get_attrs_value(r.html))
+            html = get_attribute(r, 'html')
+            word_vecs.append(input_tag_tokenizer.get_attrs_value(html))
         return word_vecs
 
     def convert_to_topic_vecs(self, records):
@@ -22,7 +34,8 @@ class Adapter(metaclass=ABCMeta):
         """
         topic_vecs = []
         for r in records:
-            topic_vecs.append(r.canonical_topic)
+            canonical_topic = get_attribute(r, 'canonical_topic')
+            topic_vecs.append(canonical_topic)
         return topic_vecs
 
     def to_bow_element_vectors(self, dictionary, word_vecs):

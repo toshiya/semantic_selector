@@ -20,10 +20,10 @@ class LsiEstimator(BaseEstimator):
         adapter = self.adapter
 
         lsi = self.__make_lsi(adapter)
-        x_train = self.__make_x(adapter, lsi, adapter.be_train)
-        y_train = self.__make_y(adapter, adapter.ot_train)
-        x_test = self.__make_x(adapter, lsi, adapter.be_test)
-        y_test = self.__make_y(adapter, adapter.ot_test)
+        x_train = self.__make_x(lsi, adapter.be_train)
+        y_train = self.__make_y(adapter.ot_train)
+        x_test = self.__make_x(lsi, adapter.be_test)
+        y_test = self.__make_y(adapter.ot_test)
 
         print("Train samples: ", len(x_train))
         print("Validation samples: ", len(x_test))
@@ -40,12 +40,19 @@ class LsiEstimator(BaseEstimator):
 
         print('Validation Acuracy', self.calc_accuracy(x_test, y_test))
 
-    # return raw topic_id
-    def predict(self, x):
+    def predict(self):
+        be_infer = self.adapter.get_bow_element_vectors()
+        x_infer = self.__make_x(self.lsi, be_infer)
+        y = self.predict_x(x_infer[0])
+        return self.all_topics[y]
+
+    def predict_x(self, x):
         return self.lr.predict([x])[0]
 
     def load_model(self, path):
-        pass
+        self.lsi = models.LsiModel.load(path + self.lsi_filename)
+        with open(path + self.lr_filename, "rb") as f:
+            self.lr = pickle.load(f)
 
     def save_model(self, path):
         self.lsi.save(path + self.lsi_filename)
@@ -59,14 +66,14 @@ class LsiEstimator(BaseEstimator):
                               num_topics=self.hidden_size)
         return lsi
 
-    def __make_x(self, adapter, lsi, vecs):
+    def __make_x(self, lsi, vecs):
         corpus = matutils.Dense2Corpus(vecs.T)
         x = []
         for vec in lsi[corpus]:
             x.append(self.__sparse_to_dense(vec))
         return x
 
-    def __make_y(self, adapter, vecs):
+    def __make_y(self, vecs):
         """
         convert array of one hot vectors to array of integer
         """

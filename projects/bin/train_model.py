@@ -7,10 +7,6 @@ from semantic_selector.adapter.training import MySQLTrainingAdapter
 
 
 def main():
-    '''
-        ./bin/infer_test
-    '''
-
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--threashold', type=int, nargs='?',
                         help='a threashold of the number of topics',
@@ -18,7 +14,7 @@ def main():
     parser.add_argument('--ratio_test', type=float, nargs='?',
                         help='a ratio of test sets', default=0.2)
     parser.add_argument('--model_name', nargs='?',
-                        help='model to use', default="nn_fc")
+                        help='model to use', default="fnn_simple")
     parser.add_argument('--seed', type=int, nargs='?',
                         help='seed of np.random', default=100)
     parser.add_argument('--epochs', type=int, nargs='?',
@@ -28,7 +24,7 @@ def main():
 
     model_name = args.model_name
     print("model type: %s" % (model_name))
-    if model_name == "fnn":
+    if model_name == "fnn_simple":
         model = FNNSimpleEstimator()
         options = {
             'threashold': args.threashold,

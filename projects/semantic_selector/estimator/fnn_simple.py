@@ -43,7 +43,10 @@ class FNNSimpleEstimator(BaseEstimator):
         print('Validation Acuracy',
               self.calc_accuracy(x_test, y_test_eval))
 
-    def predict(self, x):
+    def predict(self):
+        pass
+
+    def predict_x(self, x):
         x = np.array(x)
         x = x.reshape(1, x.shape[0])
         return self.model.predict(x)[0].argmax()
