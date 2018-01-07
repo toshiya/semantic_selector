@@ -2,7 +2,7 @@ import unittest
 from mock import mock
 from semantic_selector.mysql import Input
 from semantic_selector.tokenizer import InputTagTokenizer
-from semantic_selector.adapter.one_to_one import MySQLTrainingAdapter
+from semantic_selector.adapter.training import MySQLTrainingAdapter
 
 
 class TestMySQLTrainingAdapter(unittest.TestCase):
