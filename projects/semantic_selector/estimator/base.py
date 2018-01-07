@@ -8,20 +8,22 @@ class BaseEstimator(metaclass=ABCMeta):
         self.adapter = None
         self.dictionary = None
         self.all_topics = None
+        self.topics_filename = "/topics.pickle"
+        self.dictionary_filename = "/dictionary.pickle"
 
     def set_adapter(self, adapter):
         self.adapter = adapter
         self.dictionary = adapter.dictionary
         self.all_topics = adapter.all_topics
-        self.topics_filename = "/topics.pickle"
-        self.dictionary_filename = "/dictionary.pickle"
 
     def load(self, path):
         self.load_model(path)
         with open(path + self.topics_filename, "rb") as f:
             self.all_topics = pickle.load(f)
+            self.adapter.all_topics = self.all_topics
         with open(path + self.dictionary_filename, "rb") as f:
             self.dictionary = pickle.load(f)
+            self.adapter.dictionary = self.dictionary
 
     def save(self, path):
         if not os.path.exists(path):
@@ -37,7 +39,7 @@ class BaseEstimator(metaclass=ABCMeta):
         sample_n = 0
         correct_n = 0
         for (x, y) in zip(x_test, y_test):
-            prediction = self.predict(x)
+            prediction = self.predict_x(x)
             if (prediction == y):
                 correct_n += 1
             sample_n += 1
@@ -47,10 +49,14 @@ class BaseEstimator(metaclass=ABCMeta):
     def train(self, options=None):
         pass
 
+    @abstractmethod
+    def predict(self):
+        pass
+
     # x: element vector e.g. [0, 1, 0, ... , 1, 0]
     # output: topic id e.g. 7
     @abstractmethod
-    def predict(self, x):
+    def predict_x(self, x):
         pass
 
     @abstractmethod

@@ -1,15 +1,17 @@
 from .base import BaseEstimator
 from keras.losses import categorical_crossentropy
 from keras.optimizers import Adadelta
-from keras.models import Sequential
+from keras.models import Sequential, load_model as keras_load_model
 from keras.layers import Dense, Dropout
 import numpy as np
 
 
 class FNNSimpleEstimator(BaseEstimator):
     def __init__(self):
+        super().__init__()
         self.batch_size = 200
         self.model = None
+        self.model_filename = '/fnn_simple.h5'
 
     def train(self, options=None):
         if self.adapter is None:
@@ -22,7 +24,7 @@ class FNNSimpleEstimator(BaseEstimator):
 
         self.model = self.__construct_neural_network()
 
-        # use bow element vectors directory
+        # use bow element vectors directly
         x_train = adapter.be_train
         y_train = adapter.ot_train
         x_test = adapter.be_test
@@ -42,16 +44,21 @@ class FNNSimpleEstimator(BaseEstimator):
         print('Validation Acuracy',
               self.calc_accuracy(x_test, y_test_eval))
 
-    def predict(self, x):
+    def predict(self):
+        x_infer = self.adapter.get_bow_element_vectors()
+        topic_id = self.predict_x(x_infer[0])
+        return self.all_topics[topic_id]
+
+    def predict_x(self, x):
         x = np.array(x)
         x = x.reshape(1, x.shape[0])
         return self.model.predict(x)[0].argmax()
 
     def save_model(self, path):
-        pass
+        self.model.save(path + self.model_filename)
 
     def load_model(self, path):
-        pass
+        self.model = keras_load_model(path + self.model_filename)
 
     def __construct_neural_network(self):
         model = Sequential()
