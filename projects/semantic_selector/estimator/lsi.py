@@ -43,8 +43,8 @@ class LsiEstimator(BaseEstimator):
     def predict(self):
         be_infer = self.adapter.get_bow_element_vectors()
         x_infer = self.__make_x(self.lsi, be_infer)
-        y = self.predict_x(x_infer[0])
-        return self.all_topics[y]
+        topic_id = self.predict_x(x_infer[0])
+        return self.all_topics[topic_id]
 
     def predict_x(self, x):
         return self.lr.predict([x])[0]

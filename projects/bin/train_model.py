@@ -34,7 +34,7 @@ def main():
         adapter = MySQLTrainingAdapter(options)
         model.set_adapter(adapter)
         model.train({'epochs': args.epochs})
-        model.save("./models/fnn")
+        model.save("./models/fnn_simple")
     elif model_name == "lsi":
         model = LsiEstimator()
         options = {
