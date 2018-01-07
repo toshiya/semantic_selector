@@ -1,14 +1,18 @@
-from .base import BaseEstimator
+import pickle
 from sklearn.linear_model import LogisticRegression
 from gensim import models, matutils
+from .base import BaseEstimator
 
 
 class LsiEstimator(BaseEstimator):
     def __init__(self):
+        super().__init__()
         self.hidden_size = 500
         self.lr_solver = 'newton-cg'
         self.lr_max_iter = 10000
         self.lr_multi_class = 'ovr'
+        self.lsi_filename = "/lsi"
+        self.lr_filename = "/lr.pickle"
 
     def train(self, options=None):
         if self.adapter is None:
@@ -28,6 +32,7 @@ class LsiEstimator(BaseEstimator):
                                 max_iter=self.lr_max_iter,
                                 multi_class=self.lr_multi_class)
         lr.fit(X=x_train, y=y_train)
+        self.lsi = lsi
         self.lr = lr
 
         print("Train :", lr.score(X=x_train, y=y_train))
@@ -43,7 +48,9 @@ class LsiEstimator(BaseEstimator):
         pass
 
     def save_model(self, path):
-        pass
+        self.lsi.save(path + self.lsi_filename)
+        with open(path + self.lr_filename, "wb") as f:
+            pickle.dump(self.lr, f)
 
     def __make_lsi(self, adapter):
         raw_corpus = matutils.Dense2Corpus(adapter.be_train.T)

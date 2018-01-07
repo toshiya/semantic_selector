@@ -8,13 +8,13 @@ class BaseEstimator(metaclass=ABCMeta):
         self.adapter = None
         self.dictionary = None
         self.all_topics = None
+        self.topics_filename = "/topics.pickle"
+        self.dictionary_filename = "/dictionary.pickle"
 
     def set_adapter(self, adapter):
         self.adapter = adapter
         self.dictionary = adapter.dictionary
         self.all_topics = adapter.all_topics
-        self.topics_filename = "/topics.pickle"
-        self.dictionary_filename = "/dictionary.pickle"
 
     def load(self, path):
         self.load_model(path)

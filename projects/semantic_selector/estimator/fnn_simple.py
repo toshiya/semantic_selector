@@ -8,6 +8,7 @@ import numpy as np
 
 class FNNSimpleEstimator(BaseEstimator):
     def __init__(self):
+        super().__init__()
         self.batch_size = 200
         self.model = None
 
@@ -22,7 +23,7 @@ class FNNSimpleEstimator(BaseEstimator):
 
         self.model = self.__construct_neural_network()
 
-        # use bow element vectors directory
+        # use bow element vectors directly
         x_train = adapter.be_train
         y_train = adapter.ot_train
         x_test = adapter.be_test
