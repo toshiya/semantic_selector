@@ -1,0 +1,72 @@
+from .base import BaseEstimator
+from sklearn.linear_model import LogisticRegression
+from gensim import models, matutils
+
+
+class LsiEstimator(BaseEstimator):
+    def __init__(self):
+        self.hidden_size = 500
+        self.lr_solver = 'newton-cg'
+        self.lr_max_iter = 10000
+        self.lr_multi_class = 'ovr'
+
+    def train(self, options=None):
+        if self.adapter is None:
+            raise "please set adapter before training"
+        adapter = self.adapter
+
+        lsi = self.__make_lsi(adapter)
+        x_train = self.__make_x(adapter, lsi, adapter.be_train)
+        y_train = self.__make_y(adapter, adapter.ot_train)
+        x_test = self.__make_x(adapter, lsi, adapter.be_test)
+        y_test = self.__make_y(adapter, adapter.ot_test)
+
+        print("Train samples: ", len(x_train))
+        print("Validation samples: ", len(x_test))
+
+        lr = LogisticRegression(solver=self.lr_solver,
+                                max_iter=self.lr_max_iter,
+                                multi_class=self.lr_multi_class)
+        lr.fit(X=x_train, y=y_train)
+        self.lr = lr
+
+        print("Train :", lr.score(X=x_train, y=y_train))
+        print("Validation :", lr.score(X=x_test, y=y_test))
+
+        print('Validation Acuracy', self.calc_accuracy(x_test, y_test))
+
+    # return raw topic_id
+    def predict(self, x):
+        return self.lr.predict([x])[0]
+
+    def load_model(self, path):
+        pass
+
+    def save_model(self, path):
+        pass
+
+    def __make_lsi(self, adapter):
+        raw_corpus = matutils.Dense2Corpus(adapter.be_train.T)
+        lsi = models.LsiModel(raw_corpus,
+                              id2word=adapter.dictionary,
+                              num_topics=self.hidden_size)
+        return lsi
+
+    def __make_x(self, adapter, lsi, vecs):
+        corpus = matutils.Dense2Corpus(vecs.T)
+        x = []
+        for vec in lsi[corpus]:
+            x.append(self.__sparse_to_dense(vec))
+        return x
+
+    def __make_y(self, adapter, vecs):
+        """
+        convert array of one hot vectors to array of integer
+        """
+        return [v.argmax() for v in vecs]
+
+    def __sparse_to_dense(self, vec):
+        ret = [0 for e in range(self.hidden_size)]
+        for v in vec:
+            ret[v[0]] = v[1]
+        return ret
