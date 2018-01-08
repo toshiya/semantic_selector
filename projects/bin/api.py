@@ -1,7 +1,6 @@
-from attrdict import AttrDict
 from flask import Flask, request, jsonify, make_response
-from semantic_selector.model.one_to_one import NNFullyConnectedModel
-from semantic_selector.adapter.one_to_one import JSONInferenceAdapter
+from semantic_selector.estimator.fnn_simple import FNNSimpleEstimator
+from semantic_selector.adapter.inference import JSONInferenceAdapter
 
 
 app = Flask(__name__)
@@ -12,8 +11,11 @@ model = None
 def startup():
     global model
     print("initializing model...")
-    model = NNFullyConnectedModel()
-    model.load()
+    model = FNNSimpleEstimator()
+    options = {}
+    adapter = JSONInferenceAdapter(options)
+    model.set_adapter(adapter)
+    model.load("models/fnn_simple")
 
 
 @app.route("/api/inference", methods=['POST'])
@@ -26,9 +28,8 @@ def inference():
         err_message = 'request body json must contain "html" attributes'
         return make_response(err_message, 400)
 
-    target_tag = AttrDict({'html': request.json["html"]})
-    options = {'record': target_tag, 'dictionary': model.dictionary}
-    adapter = JSONInferenceAdapter(options)
-    estimated_topic = model.inference_html(adapter)
+    options = {"record": {'html': request.json["html"]}}
+    model.adapter.set_options(options)
+    estimated_topic = model.predict()
     res = {"topic": estimated_topic}
     return jsonify(res)

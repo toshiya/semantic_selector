@@ -2,7 +2,7 @@ import unittest
 from mock import mock
 from semantic_selector.mysql import Input
 from semantic_selector.tokenizer import InputTagTokenizer
-from semantic_selector.adapter.one_to_one import MySQLTrainingAdapter
+from semantic_selector.adapter.training import MySQLTrainingAdapter
 
 
 class TestMySQLTrainingAdapter(unittest.TestCase):
@@ -20,7 +20,9 @@ class TestMySQLTrainingAdapter(unittest.TestCase):
         training = [Input(id=1, url='url', html='html',
                           parent_html='parent_html', topic='pc_email'),
                     Input(id=2, url='url', html='html',
-                          parent_html='parent_html', topic='password')]
+                          parent_html='parent_html', topic='password'),
+                    Input(id=3, url='url2', html='html',
+                          parent_html='parent_html', topic='pc_email')]
         tests = [Input(id=3, url='url', html='html',
                        parent_html='parent_html', topic='pc_email')]
 
@@ -36,6 +38,16 @@ class TestMySQLTrainingAdapter(unittest.TestCase):
         self.assertEqual(len(adapter.all_topics), 2)
         self.assertTrue('email' in list(adapter.all_topics))
         self.assertTrue('password' in list(adapter.all_topics))
+
+        # check dimension of be_train array
+        self.assertEqual(len(adapter.be_train), 2)
+        self.assertEqual(len(adapter.be_train[0]), 2)
+        self.assertEqual(len(adapter.be_train[1]), 1)
+
+        # check dimension of be_train array
+        self.assertEqual(len(adapter.ot_train), 2)
+        self.assertEqual(len(adapter.ot_train[0]), 2)
+        self.assertEqual(len(adapter.ot_train[1]), 1)
 
 
 if __name__ == '__main__':
