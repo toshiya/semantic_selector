@@ -49,9 +49,6 @@ class TestMySQLTrainingAdapter(unittest.TestCase):
         self.assertEqual(len(adapter.ot_train[0]), 2)
         self.assertEqual(len(adapter.ot_train[1]), 1)
 
-        print(adapter.be_train)
-        print(adapter.ot_train)
-
 
 if __name__ == '__main__':
     unittest.main()
