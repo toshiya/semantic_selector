@@ -10,9 +10,7 @@ class TrainingAdapter(Adapter):
         (self.be_train,
          self.ot_train,
          self.be_test,
-         self.ot_test,
-         self.dictionary,
-         self.all_topics) = self.generate_training_data(options)
+         self.ot_test) = self.generate_training_data(options)
 
     @abstractmethod
     def generate_training_data(self, options):
@@ -35,12 +33,19 @@ class MySQLTrainingAdapter(TrainingAdapter):
         topic_vecs_test = self.convert_to_topic_vecs(test)
 
         # use dictionary and topic_types of training set
-        dictionary = corpora.Dictionary(word_vecs_train)
-        all_topics = list(set(topic_vecs_train))
+        wv_flatten = []
+        for x in word_vecs_train:
+            wv_flatten.extend(x)
+        self.dictionary = corpora.Dictionary(wv_flatten)
 
-        be_train = self.to_bow_element_vectors(dictionary, word_vecs_train)
-        ot_train = self.to_one_hot_topic_vectors(all_topics, topic_vecs_train)
-        be_test = self.to_bow_element_vectors(dictionary, word_vecs_test)
-        ot_test = self.to_one_hot_topic_vectors(all_topics, topic_vecs_test)
+        tp_flatten = []
+        for x in topic_vecs_train:
+            tp_flatten.extend(x)
+        self.all_topics = list(set(tp_flatten))
 
-        return (be_train, ot_train, be_test, ot_test, dictionary, all_topics)
+        be_train = self.to_bow_element_vectors(word_vecs_train)
+        ot_train = self.to_one_hot_topic_vectors(topic_vecs_train)
+        be_test = self.to_bow_element_vectors(word_vecs_test)
+        ot_test = self.to_one_hot_topic_vectors(topic_vecs_test)
+
+        return (be_train, ot_train, be_test, ot_test)

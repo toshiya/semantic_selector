@@ -25,10 +25,10 @@ class FNNSimpleEstimator(BaseEstimator):
         self.model = self.__construct_neural_network()
 
         # use bow element vectors directly
-        x_train = adapter.be_train
-        y_train = adapter.ot_train
-        x_test = adapter.be_test
-        y_test = adapter.ot_test
+        x_train = self.__make_x(adapter.be_train)
+        y_train = self.__make_y(adapter.ot_train)
+        x_test = self.__make_x(adapter.be_test)
+        y_test = self.__make_y(adapter.ot_test)
 
         self.model.fit(x_train, y_train,
                        batch_size=self.batch_size,
@@ -45,7 +45,7 @@ class FNNSimpleEstimator(BaseEstimator):
               self.calc_accuracy(x_test, y_test_eval))
 
     def predict(self):
-        x_infer = self.adapter.get_bow_element_vectors()
+        x_infer = self.__make_x(self.adapter.get_bow_element_vectors())
         topic_id = self.predict_x(x_infer[0])
         return self.all_topics[topic_id]
 
@@ -74,3 +74,15 @@ class FNNSimpleEstimator(BaseEstimator):
                       optimizer=Adadelta(),
                       metrics=['accuracy'])
         return model
+
+    def __make_x(self, vecs):
+        flatten = []
+        for v in vecs:
+            flatten.extend(v)
+        return np.array(flatten)
+
+    def __make_y(self, vecs):
+        flatten = []
+        for v in vecs:
+            flatten.extend(v)
+        return np.array(flatten)

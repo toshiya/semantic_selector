@@ -60,14 +60,18 @@ class LsiEstimator(BaseEstimator):
             pickle.dump(self.lr, f)
 
     def __make_lsi(self, adapter):
-        raw_corpus = matutils.Dense2Corpus(adapter.be_train.T)
+        raw_corpus = []
+        for x in adapter.be_train:
+            raw_corpus.extend(matutils.Dense2Corpus(x.T))
         lsi = models.LsiModel(raw_corpus,
                               id2word=adapter.dictionary,
                               num_topics=self.hidden_size)
         return lsi
 
     def __make_x(self, lsi, vecs):
-        corpus = matutils.Dense2Corpus(vecs.T)
+        corpus = []
+        for x in vecs:
+            corpus.extend(matutils.Dense2Corpus(x.T))
         x = []
         for vec in lsi[corpus]:
             x.append(self.__sparse_to_dense(vec))
@@ -77,7 +81,10 @@ class LsiEstimator(BaseEstimator):
         """
         convert array of one hot vectors to array of integer
         """
-        return [v.argmax() for v in vecs]
+        flatten_vecs = []
+        for x in vecs:
+            flatten_vecs.extend(x)
+        return [v.argmax() for v in flatten_vecs]
 
     def __sparse_to_dense(self, vec):
         ret = [0 for e in range(self.hidden_size)]
