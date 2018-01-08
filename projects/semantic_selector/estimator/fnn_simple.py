@@ -78,6 +78,9 @@ class FNNSimpleEstimator(BaseEstimator):
     def __make_x(self, vecs):
         flatten = []
         for v in vecs:
+            for i in range(0, len(v)):
+                a = np.array(v[i])
+                v[i] = a / np.linalg.norm(a)
             flatten.extend(v)
         return np.array(flatten)
 
