@@ -7,6 +7,9 @@ class InferenceAdapter(Adapter):
         super().__init__()
         self.options = options
 
+    def set_options(self, options):
+        self.options = options
+
     @abstractmethod
     def get_bow_element_vectors(self):
         pass
