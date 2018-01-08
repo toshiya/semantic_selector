@@ -29,7 +29,7 @@ class TestMySQLTrainingAdapter(unittest.TestCase):
         mock_get_attrs_value.return_value = ["a", "b"]
         mock_fetch_data.return_value = data
 
-        options = {'ratio_test': 0.0, 'threashold': 0, 'seed': 100}
+        options = {'ratio_test': 0.4, 'threashold': 0, 'seed': 100}
         adapter = MySQLTrainingAdapter(options)
         self.assertEqual(len(adapter.dictionary.keys()), 2)
         self.assertTrue('a' in list(adapter.dictionary.values()))
