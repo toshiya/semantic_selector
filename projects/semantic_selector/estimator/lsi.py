@@ -46,8 +46,16 @@ class LsiEstimator(BaseEstimator):
         topic_id = self.predict_x(x_infer[0])
         return self.all_topics[topic_id]
 
+    # not supported
+    def predict_with_prob_vec(self):
+        return None
+
     def predict_x(self, x):
         return self.lr.predict([x])[0]
+
+    # not supported
+    def predict_x_with_prob_vec(self, x):
+        return None
 
     def load_model(self, path):
         self.lsi = models.LsiModel.load(path + self.lsi_filename)

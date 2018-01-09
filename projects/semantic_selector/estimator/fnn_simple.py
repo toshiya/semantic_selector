@@ -42,17 +42,27 @@ class FNNSimpleEstimator(BaseEstimator):
 
         y_test_eval = [v.argmax() for v in y_test]
         print('Validation Acuracy',
-              self.calc_accuracy(x_test, y_test_eval))
+              self.calc_accuracy(x_test, y_test_eval, options["verbose"]))
 
     def predict(self):
         x_infer = self.__make_x(self.adapter.get_bow_element_vectors())
         topic_id = self.predict_x(x_infer[0])
         return self.all_topics[topic_id]
 
+    def predict_with_prob_vec(self):
+        x_infer = self.__make_x(self.adapter.get_bow_element_vectors())
+        return self.predict_x_with_prob_vec(x_infer[0])
+
     def predict_x(self, x):
         x = np.array(x)
         x = x.reshape(1, x.shape[0])
         return self.model.predict(x)[0].argmax()
+
+    def predict_x_with_prob_vec(self, x):
+        x = np.array(x)
+        x = x.reshape(1, x.shape[0])
+        return self.model.predict(x)[0]
+
 
     def save_model(self, path):
         self.model.save(path + self.model_filename)
