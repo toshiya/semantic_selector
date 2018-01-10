@@ -4,6 +4,7 @@ from semantic_selector.mysql import InputTable
 from .base import Adapter
 import numpy as np
 
+
 class TrainingAdapter(Adapter):
     def __init__(self, options):
         super().__init__()

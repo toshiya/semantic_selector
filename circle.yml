@@ -12,5 +12,5 @@ dependencies:
 
 test:
   override:
-    - pep8 projects/semantic_selector/*.py
+    - pep8 projects/semantic_selector/**/*.py
     - python -m unittest discover projects "test_*.py" -v

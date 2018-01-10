@@ -63,7 +63,6 @@ class FNNSimpleEstimator(BaseEstimator):
         x = x.reshape(1, x.shape[0])
         return self.model.predict(x)[0]
 
-
     def save_model(self, path):
         self.model.save(path + self.model_filename)
 
