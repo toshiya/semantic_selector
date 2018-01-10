@@ -24,6 +24,7 @@ class LsiEstimator(BaseEstimator):
         y_train = self.__make_y(adapter.ot_train)
         x_test = self.__make_x(lsi, adapter.be_test)
         y_test = self.__make_y(adapter.ot_test)
+        meta_test = self.__make_meta(adapter.meta_test)
 
         print("Train samples: ", len(x_train))
         print("Validation samples: ", len(x_test))
@@ -38,7 +39,8 @@ class LsiEstimator(BaseEstimator):
         print("Train :", lr.score(X=x_train, y=y_train))
         print("Validation :", lr.score(X=x_test, y=y_test))
 
-        print('Validation Acuracy', self.calc_accuracy(x_test, y_test))
+        print('Validation Acuracy',
+              self.calc_accuracy(x_test, y_test, meta_test))
 
     def predict(self):
         be_infer = self.adapter.get_bow_element_vectors()
@@ -86,13 +88,16 @@ class LsiEstimator(BaseEstimator):
         return x
 
     def __make_y(self, vecs):
-        """
-        convert array of one hot vectors to array of integer
-        """
         flatten_vecs = []
         for x in vecs:
             flatten_vecs.extend(x)
         return [v.argmax() for v in flatten_vecs]
+
+    def __make_meta(self, vecs):
+        flatten_vecs = []
+        for x in vecs:
+            flatten_vecs.extend(x)
+        return flatten_vecs
 
     def __sparse_to_dense(self, vec):
         ret = [0 for e in range(self.hidden_size)]

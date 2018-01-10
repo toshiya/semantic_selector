@@ -17,6 +17,18 @@ def get_attribute(e, key):
         return None
 
 
+class MetaInfo(object):
+    def __init__(self, record):
+        self.url = get_attribute(record, 'url')
+        self.html = get_attribute(record, 'html')
+        self.topic = get_attribute(record, 'canonical_topic')
+
+    def __repr__(self):
+        return "url:{}\nhtml:{}\ntopic:{}".format(self.url,
+                                                  self.html,
+                                                  self.topic)
+
+
 class Adapter(metaclass=ABCMeta):
     def __init__(self):
         self.dictionary = None
@@ -66,6 +78,23 @@ class Adapter(metaclass=ABCMeta):
         for url in sorted(url_to_topic_vecs):
             topic_vecs.append(url_to_topic_vecs[url])
         return topic_vecs
+
+    def convert_to_meta_vecs(self, records):
+        url_to_meta_vecs = {}
+        for r in records:
+            url = get_attribute(r, 'url')
+            if url is None:
+                url = self.const_nourl
+
+            if url not in url_to_meta_vecs:
+                url_to_meta_vecs[url] = []
+
+            url_to_meta_vecs[url].append(MetaInfo(r))
+
+        meta_vecs = []
+        for url in sorted(url_to_meta_vecs):
+            meta_vecs.append(url_to_meta_vecs[url])
+        return meta_vecs
 
     def to_bow_element_vectors(self, word_vecs):
         ret = []

@@ -35,18 +35,18 @@ class BaseEstimator(metaclass=ABCMeta):
             self.dictionary.save(f)
 
     # Note: y_test is topic id array, not one hot vector
-    def calc_accuracy(self, x_test, y_test, verbose=False):
+    def calc_accuracy(self, x_test, y_test, meta_test, verbose=False):
         sample_n = 0
         correct_n = 0
-        for (x, y) in zip(x_test, y_test):
+        for (x, y, m) in zip(x_test, y_test, meta_test):
             prediction = self.predict_x(x)
             if (prediction == y):
                 correct_n += 1
             else:
                 if verbose:
-                    print("correct label: " + self.all_topics[y])
                     prob_vec = self.predict_x_with_prob_vec(x)
                     if prob_vec is not None:
+                        print(m)
                         self.print_probalitity(prob_vec)
             sample_n += 1
         return (float(correct_n) / float(sample_n))
@@ -54,6 +54,7 @@ class BaseEstimator(metaclass=ABCMeta):
     def print_probalitity(self, prob_vec):
         for (i, p) in enumerate(prob_vec):
             print("    {:25}: {:1.5f}".format(self.all_topics[i], p))
+        print()
 
     @abstractmethod
     def train(self, options=None):

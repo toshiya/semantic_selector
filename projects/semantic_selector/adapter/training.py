@@ -10,8 +10,10 @@ class TrainingAdapter(Adapter):
         super().__init__()
         (self.be_train,
          self.ot_train,
+         self.meta_train,
          self.be_test,
-         self.ot_test) = self.generate_training_data(options)
+         self.ot_test,
+         self.meta_test) = self.generate_training_data(options)
 
     @abstractmethod
     def generate_training_data(self, options):
@@ -29,6 +31,9 @@ class MySQLTrainingAdapter(TrainingAdapter):
 
         word_vecs = self.convert_to_word_vecs(data)
         topic_vecs = self.convert_to_topic_vecs(data)
+        meta_vecs = self.convert_to_meta_vecs(data)
+        assert(len(word_vecs) == len(topic_vecs))
+        assert(len(meta_vecs) == len(topic_vecs))
 
         # use dictionary and topic_types of training set
         wv_flatten = []
@@ -51,19 +56,23 @@ class MySQLTrainingAdapter(TrainingAdapter):
 
         word_vecs_train = []
         topic_vecs_train = []
+        meta_train = []
         word_vecs_test = []
         topic_vecs_test = []
+        meta_test = []
         for i in range(0, num_pages):
             if i not in test_indices:
                 word_vecs_train.append(word_vecs[i])
                 topic_vecs_train.append(topic_vecs[i])
+                meta_train.append(meta_vecs[i])
             else:
                 word_vecs_test.append(word_vecs[i])
                 topic_vecs_test.append(topic_vecs[i])
+                meta_test.append(meta_vecs[i])
 
         be_train = self.to_bow_element_vectors(word_vecs_train)
         ot_train = self.to_one_hot_topic_vectors(topic_vecs_train)
         be_test = self.to_bow_element_vectors(word_vecs_test)
         ot_test = self.to_one_hot_topic_vectors(topic_vecs_test)
 
-        return (be_train, ot_train, be_test, ot_test)
+        return (be_train, ot_train, meta_train, be_test, ot_test, meta_test)
