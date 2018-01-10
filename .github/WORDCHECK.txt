@@ -1,3 +1,0 @@
-set_trace
-todo
-hoge

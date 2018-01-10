@@ -3,8 +3,6 @@ machine:
     PYTHONPATH: projects
   python:
     version: 3.5.1
-  node:
-    version: 8.3.0
 
 dependencies:
   pre:
@@ -14,6 +12,5 @@ dependencies:
 
 test:
   override:
-    - pep8 projects/semantic_selector/*.py
+    - pep8 projects/semantic_selector/**/*.py
     - python -m unittest discover projects "test_*.py" -v
-    - npm run danger

@@ -10,6 +10,7 @@ def main():
     parser.add_argument('--html', nargs='?', help='input html string')
     parser.add_argument('--model_name', nargs='?',
                         help='model to use', default="fnn_simple")
+    parser.add_argument('--debug', action='store_true')
     args = parser.parse_args()
     input_html = args.html
     model_name = args.model_name
@@ -23,6 +24,9 @@ def main():
         model.load("models/fnn_simple")
         topic = model.predict()
         print("infered topic: " + topic)
+        if args.debug:
+            prob_vec = model.predict_with_prob_vec()
+            model.print_probalitity(prob_vec)
     elif model_name == "lsi":
         model = LsiEstimator()
         options = {
