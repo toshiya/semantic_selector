@@ -49,6 +49,28 @@ class BaseEstimator(metaclass=ABCMeta):
                         print(m)
                         self.print_probalitity(prob_vec)
             sample_n += 1
+
+        if verbose:
+            print("Accuracy Per Url")
+            sample_url_n = {}
+            correct_url_n = {}
+            for (x, y, m) in zip(x_test, y_test, meta_test):
+                url = m.url
+                if url not in sample_url_n:
+                    sample_url_n[url] = 0
+                if url not in correct_url_n:
+                    correct_url_n[url] = 0
+                prediction = self.predict_x(x)
+                if (prediction == y):
+                    correct_url_n[url] += 1
+                sample_url_n[url] += 1
+            for url in sample_url_n:
+                acc = float(correct_url_n[url]) / float(sample_url_n[url])
+                print("    {}: {:1.5f}({}/{})".format(url[:20],
+                                                      acc,
+                                                      correct_url_n[url],
+                                                      sample_url_n[url]))
+
         return (float(correct_n) / float(sample_n))
 
     def print_probalitity(self, prob_vec):
