@@ -1,6 +1,6 @@
 mail_delivery,mailSubscriptionCheck
 gender,gender
-questionnaire,question
+questionnaire,exclude
 pc_email,email
 other,unknown
 password,password
