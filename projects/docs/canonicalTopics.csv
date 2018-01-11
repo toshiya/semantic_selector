@@ -40,12 +40,12 @@ user_name_furigana,userName
 postal_delivery,mailSubscriptionCheck
 company_department,unknown
 country,address-country
-nickname,nickname
+nickname,userName
 payment_type,unknown
 tel_type,unknown
 privacy_policy,serviceTermCheck
-security_question,securityQuestion
-security_answer,securityAnswer
+security_question,unknown
+security_answer,unknown
 search_button,unknown
 postal_code_search,postalCodeSearchButton
 back_button,backButton

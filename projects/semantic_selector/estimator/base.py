@@ -73,6 +73,28 @@ class BaseEstimator(metaclass=ABCMeta):
                                                           correct_url_n[url],
                                                           sample_url_n[url]))
 
+            print("Accuracy Per Topic")
+            sample_tp_n = {}
+            correct_tp_n = {}
+            acc_tp = {}
+            for (x, y, m) in zip(x_test, y_test, meta_test):
+                tp = m.topic
+                if tp not in sample_tp_n:
+                    sample_tp_n[tp] = 0
+                if tp not in correct_tp_n:
+                    correct_tp_n[tp] = 0
+                prediction = self.predict_x(x)
+                if (prediction == y):
+                    correct_tp_n[tp] += 1
+                sample_tp_n[tp] += 1
+            for tp in sample_tp_n:
+                acc_tp[tp] = float(correct_tp_n[tp]) / sample_tp_n[tp]
+            for tp, acc in sorted(acc_tp.items(), key=lambda x: -x[1]):
+                print("    {:110}: {:1.5f}({}/{})".format(tp.split('?')[0],
+                                                          acc,
+                                                          correct_tp_n[tp],
+                                                          sample_tp_n[tp]))
+
         return (float(correct_n) / float(sample_n))
 
     def print_probalitity(self, prob_vec):
