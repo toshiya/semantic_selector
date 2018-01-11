@@ -35,7 +35,7 @@ user_name,userName
 birthday,birthDate
 company_name,unknown
 user_type,unknown
-search_window,unknown
+search_window,searchWindow
 user_name_furigana,userName
 postal_delivery,mailSubscriptionCheck
 company_department,unknown
@@ -46,7 +46,7 @@ tel_type,unknown
 privacy_policy,serviceTermCheck
 security_question,unknown
 security_answer,unknown
-search_button,unknown
+search_button,searchButton
 postal_code_search,postalCodeSearchButton
 back_button,backButton
 mail_format,unknown
