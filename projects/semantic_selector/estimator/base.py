@@ -54,6 +54,7 @@ class BaseEstimator(metaclass=ABCMeta):
             print("Accuracy Per Url")
             sample_url_n = {}
             correct_url_n = {}
+            acc_url = {}
             for (x, y, m) in zip(x_test, y_test, meta_test):
                 url = m.url
                 if url not in sample_url_n:
@@ -65,11 +66,34 @@ class BaseEstimator(metaclass=ABCMeta):
                     correct_url_n[url] += 1
                 sample_url_n[url] += 1
             for url in sample_url_n:
-                acc = float(correct_url_n[url]) / float(sample_url_n[url])
-                print("    {}: {:1.5f}({}/{})".format(url[:20],
-                                                      acc,
-                                                      correct_url_n[url],
-                                                      sample_url_n[url]))
+                acc_url[url] = float(correct_url_n[url]) / sample_url_n[url]
+            for url, acc in sorted(acc_url.items(), key=lambda x: -x[1]):
+                print("    {:110}: {:1.5f}({}/{})".format(url.split('?')[0],
+                                                          acc,
+                                                          correct_url_n[url],
+                                                          sample_url_n[url]))
+
+            print("Accuracy Per Topic")
+            sample_tp_n = {}
+            correct_tp_n = {}
+            acc_tp = {}
+            for (x, y, m) in zip(x_test, y_test, meta_test):
+                tp = m.topic
+                if tp not in sample_tp_n:
+                    sample_tp_n[tp] = 0
+                if tp not in correct_tp_n:
+                    correct_tp_n[tp] = 0
+                prediction = self.predict_x(x)
+                if (prediction == y):
+                    correct_tp_n[tp] += 1
+                sample_tp_n[tp] += 1
+            for tp in sample_tp_n:
+                acc_tp[tp] = float(correct_tp_n[tp]) / sample_tp_n[tp]
+            for tp, acc in sorted(acc_tp.items(), key=lambda x: -x[1]):
+                print("    {:110}: {:1.5f}({}/{})".format(tp.split('?')[0],
+                                                          acc,
+                                                          correct_tp_n[tp],
+                                                          sample_tp_n[tp]))
 
         return (float(correct_n) / float(sample_n))
 

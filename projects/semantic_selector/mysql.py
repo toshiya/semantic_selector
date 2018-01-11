@@ -2,6 +2,7 @@
 import os
 import mysql.connector
 import time
+import re
 import numpy as np
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -40,9 +41,27 @@ class InputTable(object):
             self.connect_info = connect_info
         self.exclude_threshold = exclude_threshold
         self.session = None
+        self.exclude_urls = [
+            'miu.ismedia.jp',
+            'www.ticket.kintetsu.co.jp',
+            'www.charge-net.co.jp',
+        ]
 
     def fetch_data(self):
-        return self.query()
+        data = self.query()
+        result = []
+        for d in data:
+            exclude = False
+            for pattern in self.exclude_urls:
+                if re.search(pattern, d.url):
+                    exclude = True
+            if d.canonical_topic == 'exclude':
+                exclude = True
+
+            if not exclude:
+                result.append(d)
+
+        return result
 
     def __get_session(self):
         if self.session is None:
