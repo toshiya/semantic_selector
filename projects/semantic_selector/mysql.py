@@ -17,6 +17,7 @@ class Input(declarative_base()):
     id = Column(Integer, primary_key=True)
     url = Column(String)
     html = Column(String)
+    label_html = Column(String)
     parent_html = Column(String)
     topic = Column(String)
     canonical_table = CanonicalTopicTable().get()

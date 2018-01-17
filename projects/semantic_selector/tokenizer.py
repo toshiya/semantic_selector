@@ -13,7 +13,7 @@ class InputTagTokenizer(object):
     def __init__(self):
         self.tokenizer = tokenizer
         self.target_attributes = ['name', 'type', 'id', 'value',
-                                  'alt', 'placeholder']
+                                  'alt', 'placeholder', 'aria-label']
         self.exclude_words = ["", ".", "(", ")", "/", "\n"]
 
     def mecab_tokenize(self, text):
@@ -28,16 +28,21 @@ class InputTagTokenizer(object):
 
     def get_attrs_value(self, html):
         html_soup = BeautifulSoup(html, 'html.parser')
+        words = []
 
         s = html_soup.find('input')
         if s is not None:
-            return self.__attrs_values_from_input(s)
+            words.extend(self.__attrs_values_from_input(s))
 
         s = html_soup.find('select')
         if s is not None:
-            return self.__attrs_values_from_select(s)
+            words.extend(self.__attrs_values_from_select(s))
 
-        return []
+        s = html_soup.find('label')
+        if s is not None:
+            words.extend(self.__attrs_values_from_label(s))
+
+        return words
 
     def __attrs_values_from_input(self, input_tag):
         words = []
@@ -48,6 +53,13 @@ class InputTagTokenizer(object):
             for token in self.__preprocess(input_tag.attrs[k]):
                 words.append(token)
 
+        return words
+
+    def __attrs_values_from_label(self, label_tag):
+        words = []
+        if label_tag.text != '':
+            for token in self.__preprocess(label_tag.text):
+                words.append(token)
         return words
 
     def __attrs_values_from_select(self, select_tag):

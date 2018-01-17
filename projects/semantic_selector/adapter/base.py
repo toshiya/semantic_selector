@@ -47,6 +47,10 @@ class Adapter(metaclass=ABCMeta):
             if html is None:
                 raise "record must have html strings."
 
+            label_html = get_attribute(r, 'label_html')
+            if label_html is not None:
+                html += " " + label_html
+
             if url not in url_to_word_vecs:
                 url_to_word_vecs[url] = []
 
