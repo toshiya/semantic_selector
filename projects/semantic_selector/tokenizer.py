@@ -42,6 +42,18 @@ class InputTagTokenizer(object):
         if s is not None:
             words.extend(self.__attrs_values_from_label(s))
 
+        s = html_soup.find('button')
+        if s is not None:
+            words.extend(self.__attrs_values_from_button(s))
+
+        s = html_soup.find('a')
+        if s is not None:
+            words.extend(self.__attrs_values_from_alink(s))
+
+        s = html_soup.find('img')
+        if s is not None:
+            words.extend(self.__attrs_values_from_img(s))
+
         return words
 
     def __attrs_values_from_input(self, input_tag):
@@ -59,6 +71,52 @@ class InputTagTokenizer(object):
         words = []
         if label_tag.text != '':
             for token in self.__preprocess(label_tag.text):
+                words.append(token)
+        return words
+
+    def __attrs_values_from_img(self, tag):
+        words = []
+        target_attrs = ['src', 'alt']
+        for k in target_attrs:
+            if (k not in tag.attrs) or (tag.attrs[k] == ''):
+                continue
+
+            for token in self.__preprocess(tag.attrs[k]):
+                words.append(token)
+
+        return words
+
+    def __attrs_values_from_button(self, tag):
+        words = []
+        for k in self.target_attributes:
+            if (k not in tag.attrs) or (tag.attrs[k] == ''):
+                continue
+
+            for token in self.__preprocess(tag.attrs[k]):
+                words.append(token)
+
+        if tag.text != '':
+            for token in self.__preprocess(tag.text):
+                words.append(token)
+
+        return words
+
+    def __attrs_values_from_alink(self, tag):
+        words = []
+        # TODO:
+        # class attributes includes useful information along with noisy
+        # information. we have to do some more sophisticated data cleaning
+        # for values from class attributes.
+        target_attrs = []
+        for k in target_attrs:
+            if (k not in tag.attrs) or (tag.attrs[k] == ''):
+                continue
+
+            for token in self.__preprocess(tag.attrs[k]):
+                words.append(token)
+
+        if tag.text != '':
+            for token in self.__preprocess(tag.text):
                 words.append(token)
         return words
 
@@ -87,7 +145,7 @@ class InputTagTokenizer(object):
     def __preprocess(self, value):
         snake_case_value = self.__convert_to_snake(value)
         snake_case_value = re.sub(r'([0-9]+)', r'_\1', snake_case_value)
-        tokens = re.split(r'[-_\]\[ ]', snake_case_value)
+        tokens = re.split(r'[-_\]\[/ ]', snake_case_value)
         for t in tokens:
             japanese_tokens = self.mecab_tokenize(t)
             for j_t in japanese_tokens:
