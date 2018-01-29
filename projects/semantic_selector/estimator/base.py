@@ -1,4 +1,5 @@
 import os
+import csv
 import pickle
 from abc import ABCMeta, abstractmethod
 
@@ -67,6 +68,7 @@ class BaseEstimator(metaclass=ABCMeta):
                 sample_url_n[url] += 1
             for url in sample_url_n:
                 acc_url[url] = float(correct_url_n[url]) / sample_url_n[url]
+
             for url, acc in sorted(acc_url.items(), key=lambda x: -x[1]):
                 print("    {:110}: {:1.5f}({}/{})".format(url.split('?')[0],
                                                           acc,
@@ -94,6 +96,15 @@ class BaseEstimator(metaclass=ABCMeta):
                                                           acc,
                                                           correct_tp_n[tp],
                                                           sample_tp_n[tp]))
+
+            with open('accuracy_per_topic.csv', 'w', newline='') as csvfile:
+                writer = csv.writer(csvfile,
+                                    delimiter=',',
+                                    quotechar='"',
+                                    quoting=csv.QUOTE_MINIMAL)
+                writer.writerow(['Topic Name', 'Accuracy'])
+                for tp, acc in sorted(acc_tp.items(), key=lambda x: -x[1]):
+                    writer.writerow([tp, acc])
 
         return (float(correct_n) / float(sample_n))
 
