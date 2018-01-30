@@ -19,7 +19,7 @@ def main():
                         help='seed of np.random', default=100)
     parser.add_argument('--epochs', type=int, nargs='?',
                         help='seed of np.random', default=400)
-    parser.add_argument('--debug', action='store_true')
+    parser.add_argument('--verbose', type=int, default=0)
     args = parser.parse_args()
 
     model_name = args.model_name
@@ -33,7 +33,7 @@ def main():
         }
         adapter = MySQLTrainingAdapter(options)
         model.set_adapter(adapter)
-        model.train({'epochs': args.epochs, 'verbose': args.debug})
+        model.train({'epochs': args.epochs, 'verbose': args.verbose})
         model.save("./models/fnn_simple")
     elif model_name == "lsi":
         model = LsiEstimator()
