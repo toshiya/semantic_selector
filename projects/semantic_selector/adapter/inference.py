@@ -6,6 +6,7 @@ class InferenceAdapter(Adapter):
     def __init__(self, options):
         super().__init__()
         self.options = options
+        self.inference = True
 
     def set_options(self, options):
         self.options = options

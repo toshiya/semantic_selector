@@ -14,7 +14,7 @@ class InputTagTokenizer(object):
         self.tokenizer = tokenizer
         self.target_attributes = ['name', 'type', 'id', 'value',
                                   'alt', 'placeholder', 'aria-label']
-        self.exclude_words = ["", ".", "(", ")", "/", "\n"]
+        self.exclude_words = ["", ".", "(", ")", "/", "\n", "text"]
 
     def mecab_tokenize(self, text):
         ret = []
@@ -26,7 +26,7 @@ class InputTagTokenizer(object):
             node = node.next
         return ret
 
-    def get_attrs_value(self, html):
+    def get_attrs_value(self, html, inference=False):
         html_soup = BeautifulSoup(html, 'html.parser')
         words = []
 
@@ -42,17 +42,19 @@ class InputTagTokenizer(object):
         if s is not None:
             words.extend(self.__attrs_values_from_label(s))
 
-        s = html_soup.find('button')
-        if s is not None:
-            words.extend(self.__attrs_values_from_button(s))
+        if inference:
 
-        s = html_soup.find('a')
-        if s is not None:
-            words.extend(self.__attrs_values_from_alink(s))
+            s = html_soup.find('button')
+            if s is not None:
+                words.extend(self.__attrs_values_from_button(s))
 
-        s = html_soup.find('img')
-        if s is not None:
-            words.extend(self.__attrs_values_from_img(s))
+            s = html_soup.find('a')
+            if s is not None:
+                words.extend(self.__attrs_values_from_alink(s))
+
+            s = html_soup.find('img')
+            if s is not None:
+                words.extend(self.__attrs_values_from_img(s))
 
         return words
 

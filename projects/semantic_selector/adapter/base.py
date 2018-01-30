@@ -34,6 +34,7 @@ class Adapter(metaclass=ABCMeta):
         self.dictionary = None
         self.all_topics = None
         self.const_nourl = "nourl"
+        self.inference = False
 
     def convert_to_word_vecs(self, records):
         input_tag_tokenizer = InputTagTokenizer()
@@ -54,7 +55,8 @@ class Adapter(metaclass=ABCMeta):
             if url not in url_to_word_vecs:
                 url_to_word_vecs[url] = []
 
-            word_vec = input_tag_tokenizer.get_attrs_value(html)
+            word_vec = input_tag_tokenizer.get_attrs_value(html,
+                                                           self.inference)
             url_to_word_vecs[url].append(word_vec)
 
         word_vecs = []
