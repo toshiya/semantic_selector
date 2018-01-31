@@ -35,7 +35,7 @@ class BaseEstimator(metaclass=ABCMeta):
         with open(path + self.dictionary_filename, "wb") as f:
             self.dictionary.save(f)
 
-    # Note: y_test is topic id array, not one hot vector
+    # TODO: refactor
     def calc_accuracy(self, x_test, y_test, meta_test, verbose=0):
         sample_n = 0
         ans_n = 0
@@ -73,7 +73,7 @@ class BaseEstimator(metaclass=ABCMeta):
         print("Precision(correct_n/pred_n): {:1.5f}({:3d}/{:3d})"
               .format(total_precision, correct_n, pred_n))
         print("F Measure                  : {:1.5f}".format(fmeasure))
-        print("ration of unknown samples: {:1.5f}({:3d}/{:3d})".format(
+        print("ratio of unknown samples: {:1.5f}({:3d}/{:3d})".format(
               float(unknown_n)/sample_n,
               unknown_n,
               sample_n))
