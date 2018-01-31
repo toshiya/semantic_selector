@@ -35,21 +35,48 @@ class BaseEstimator(metaclass=ABCMeta):
         with open(path + self.dictionary_filename, "wb") as f:
             self.dictionary.save(f)
 
-    # Note: y_test is topic id array, not one hot vector
+    # TODO: refactor
     def calc_accuracy(self, x_test, y_test, meta_test, verbose=0):
         sample_n = 0
+        ans_n = 0
+        pred_n = 0
         correct_n = 0
+        correct_u_n = 0
+        unknown_n = 0
         for (x, y, m) in zip(x_test, y_test, meta_test):
-            prediction = self.predict_x(x)
-            if (prediction == y):
-                correct_n += 1
+            ans = m.topic
+            pred = self.all_topics[self.predict_x(x)]
+            if ans == pred:
+                correct_u_n += 1
+                if ans != 'unknown':
+                    correct_n += 1
             else:
                 if verbose >= 3:
                     prob_vec = self.predict_x_with_prob_vec(x)
                     if prob_vec is not None:
                         print(m)
                         self.print_probalitity(prob_vec)
+            if ans != 'unknown':
+                ans_n += 1
+            else:
+                unknown_n += 1
+            if pred != 'unknown':
+                pred_n += 1
             sample_n += 1
+
+        total_recall = float(correct_n) / ans_n
+        total_precision = float(correct_n) / pred_n
+        fmeasure = (2*total_recall*total_precision) / \
+                   (total_recall + total_precision)
+        print("Recall(correct_n/ans_n)    : {:1.5f}({:3d}/{:3d})"
+              .format(total_recall, correct_n, ans_n))
+        print("Precision(correct_n/pred_n): {:1.5f}({:3d}/{:3d})"
+              .format(total_precision, correct_n, pred_n))
+        print("F Measure                  : {:1.5f}".format(fmeasure))
+        print("ratio of unknown samples: {:1.5f}({:3d}/{:3d})".format(
+              float(unknown_n)/sample_n,
+              unknown_n,
+              sample_n))
 
         if verbose >= 2:
             print("Accuracy Per Url")
@@ -137,7 +164,7 @@ class BaseEstimator(metaclass=ABCMeta):
                                      precision_tp[tp],
                                      fmeasure_tp[tp]])
 
-        return (float(correct_n) / float(sample_n))
+        return (float(correct_u_n) / float(sample_n))
 
     def print_probalitity(self, prob_vec):
         for (i, p) in enumerate(prob_vec):
