@@ -46,6 +46,10 @@ class InputTable(object):
             'miu.ismedia.jp',
             'www.ticket.kintetsu.co.jp',
             'www.charge-net.co.jp',
+            'www.facebook.com',
+            'www.amazon.co.jp',
+            'twitter.com',
+            'account.edit.yahoo.co.jp',
         ]
 
     def fetch_data(self):

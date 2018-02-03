@@ -27,7 +27,7 @@ phone_number_first,telephone
 phone_number_middle,telephone
 phone_number_last,telephone
 card_number,unknown
-user_id,unknown
+user_id,userId
 job,unknown
 postal_code_last,postalCode
 postal_code_first,postalCode
