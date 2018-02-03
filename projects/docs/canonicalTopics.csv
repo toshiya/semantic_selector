@@ -5,9 +5,9 @@ pc_email,email
 other,unknown
 password,password
 password_confirmation,password
-birthday_year,birthDate
-birthday_month,birthDate
-birthday_day,birthDate
+birthday_year,birthDateYear
+birthday_month,birthDateMonth
+birthday_day,birthDateDay
 family_name,userName
 first_name,userName
 family_name_furigana,userName
