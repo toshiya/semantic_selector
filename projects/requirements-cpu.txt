@@ -26,8 +26,10 @@ Markdown==2.6.11
 MarkupSafe==1.0
 matplotlib==2.0.2
 mecab-python3==0.7
+mock==2.0.0
 mysql-connector==2.1.4
 numpy==1.14.0
+pbr==3.1.1
 pep8==1.7.0
 pexpect==4.2.1
 pickleshare==0.7.4
