@@ -7,3 +7,4 @@ tool/vendor/
 venv/
 models/
 .token
+per_topic.csv
