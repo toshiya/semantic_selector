@@ -8,9 +8,9 @@ dependencies:
   pre:
     - sudo apt-get install mecab libmecab-dev mecab-ipadic mecab-ipadic-utf8
     - pip install --upgrade pip
-    - pip3 install -r projects/requirements-cpu.txt
+    - pip3 install -r projects/requirements.txt
 
 test:
   override:
-    - pep8 projects/semantic_selector/**/*.py
+    - pycodestyle projects/semantic_selector/**/*.py
     - python -m unittest discover projects "test_*.py" -v

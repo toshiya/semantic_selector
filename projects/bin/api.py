@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, make_response
-from semantic_selector.estimator.fnn_simple import FNNSimpleEstimator
+from semantic_selector.estimator.lsi import LsiEstimator
 from semantic_selector.adapter.inference import JSONInferenceAdapter
 
 
@@ -11,11 +11,13 @@ model = None
 def startup():
     global model
     print("initializing model...")
-    model = FNNSimpleEstimator()
+    #model = FNNSimpleEstimator()
+    model = LsiEstimator()
     options = {}
     adapter = JSONInferenceAdapter(options)
     model.set_adapter(adapter)
-    model.load("models/fnn_simple")
+    #model.load("models/fnn_simple")
+    model.load("models/lsi")
 
 
 @app.route("/api/inference", methods=['POST'])
