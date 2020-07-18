@@ -115,7 +115,7 @@ class Adapter(metaclass=ABCMeta):
 
         ret = []
         for vecs_in_page in topic_vecs:
-            y = [all_topics.index(l) for l in vecs_in_page]
+            y = [all_topics.index(ll) for ll in vecs_in_page]
             y = np.asarray(y, dtype='int')
 
             # Note:
