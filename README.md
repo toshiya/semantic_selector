@@ -1,5 +1,3 @@
-[![CircleCI](https://circleci.com/gh/toshiya/semantic_selector.svg?style=svg)](https://circleci.com/gh/toshiya/semantic_selector)
-
 **This project is now in experimental stage.**
 
 # What's the purpose of this project?
